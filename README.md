@@ -11,9 +11,9 @@ This watchface was made for the
 
 ## Screenshots
 
-| Aplite                                | Basalt                                | Diorite                                 |
-| ------------------------------------- | ------------------------------------- | --------------------------------------- |
-| ![Aplite](img/screenshots/aplite.png) | ![Basalt](img/screenshots/basalt.png) | ![Diorite](img/screenshots/diorite.png) |
+| Aplite                                | Basalt                                | Chalk                                   | Diorite                                 |
+| ------------------------------------- | ------------------------------------- | --------------------------------------- | --------------------------------------- |
+| ![Aplite](img/screenshots/aplite.png) | ![Basalt](img/screenshots/basalt.png) | ![Chalk](img/screenshots/chalk.png)     | ![Diorite](img/screenshots/diorite.png) |
 
 ## Installing
 

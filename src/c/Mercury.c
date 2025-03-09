@@ -13,8 +13,8 @@ static struct tm *prv_tick_time;
 static struct BinaryImageMaskData *dial;
 static struct BinaryImageMaskData *digits;
 static int current_date = -1;
-static enum DialType dial_type = FONT1;
 static ClaySettings settings;
+static DialSpec *ds;
 
 //#define LOG
 //#define LOGTIME
@@ -159,19 +159,43 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
 
   prv_save_settings();
   draw_dial();
-  //TODO: Mark layer dirty
+  layer_mark_dirty(s_bg_layer);
 }
 
 
 
 DialSpec* get_dial_spec(enum DialType dial_type) {
   DialSpec *ds = (DialSpec*) malloc(sizeof(DialSpec));
-  ds->logo = GPoint(53, 27);
-  ds->model = GPoint(36, 40);
+
   ds->logo_size = GSize(38, 12);
   ds->model_size = GSize(71, 5);
   ds->logo_res = RESOURCE_ID_LOGO;
   ds->models_res = RESOURCE_ID_MODELS;
+
+  if (dial_type == FONT1 || dial_type == FONT2 || dial_type == FONT3) {
+    ds->logo = GPoint(53, 27);
+    ds->model = GPoint(36, 40);
+  }
+  else if (dial_type == FONT1_ROUND || dial_type == FONT2_ROUND || dial_type == FONT3_ROUND) {
+    ds->logo = GPoint(71, 39);
+    ds->model = GPoint(54, 52);
+  } else {
+    free(ds);
+    return ds;
+  }
+
+  if (dial_type == FONT1 || dial_type == FONT1_ROUND) {
+      ds->date_box_size = GSize(34, 22);
+      ds->digit_size = GSize(10, 14);
+      ds->marker_size = GSize(22, 19);
+
+      ds->date_box_res = RESOURCE_ID_DATE_BOX1;
+      ds->digit_res = RESOURCE_ID_DIGITS1;
+      ds->marker_res = RESOURCE_ID_MARKERS1;
+  } else {
+    free(ds);
+    return ds;
+  }
 
   switch (dial_type) {
     case FONT1:
@@ -193,13 +217,26 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
       ds->date2 = GPoint(73, 118);
       ds->date_single = GPoint(67, 118);
 
-      ds->date_box_size = GSize(34, 22);
-      ds->digit_size = GSize(10, 14);
-      ds->marker_size = GSize(22, 19);
+      break;
+    case FONT1_ROUND:
+      ds->markers[0] = GPoint(79, 5);
+      ds->markers[1] = GPoint(118, 20);
+      ds->markers[2] = GPoint(143, 45);
+      ds->markers[3] = GPoint(152, 80);
+      ds->markers[4] = GPoint(143, 115);
+      ds->markers[5] = GPoint(118, 140);
+      ds->markers[6] = GPoint(79, 155);
+      ds->markers[7] = GPoint(40, 140);
+      ds->markers[8] = GPoint(15, 115);
+      ds->markers[9] = GPoint(6, 80);
+      ds->markers[10] = GPoint(15, 45);
+      ds->markers[11] = GPoint(40, 20);
 
-      ds->date_box_res = RESOURCE_ID_DATE_BOX1;
-      ds->digit_res = RESOURCE_ID_DIGITS1;
-      ds->marker_res = RESOURCE_ID_MARKERS1;
+      ds->date_box = GPoint(73, 115);
+      ds->date1 = GPoint(79, 119);
+      ds->date2 = GPoint(91, 119);
+      ds->date_single = GPoint(85, 119);
+
       break;
     default:
       free(ds);
@@ -213,12 +250,11 @@ static void update_date() {
   APP_LOG(APP_LOG_LEVEL_INFO, "Updating Date");
 #endif
 
-  //TODO Read dial spec
-  binary_image_mask_data_clear_region(dial, GRect(61, 118, 22, 14));
+  binary_image_mask_data_clear_region(dial, GRect(ds->date1.x, ds->date1.y, ds->date2.x + ds->digit_size.w - ds->date1.x, ds->date2.y + ds->digit_size.h - ds->date1.y));
   int d1 = current_date / 10;
   int d2 = current_date % 10;
-  binary_image_mask_data_draw(dial, digits, GPoint(61, 118), GRect(d1*10, 0, 10, 14));
-  binary_image_mask_data_draw(dial, digits, GPoint(73, 118), GRect(d2*10, 0, 10, 14));
+  binary_image_mask_data_draw(dial, digits, ds->date1, GRect(d1*ds->digit_size.w, 0, ds->digit_size.w, ds->digit_size.h));
+  binary_image_mask_data_draw(dial, digits, ds->date2, GRect(d2*ds->digit_size.w, 0, ds->digit_size.w, ds->digit_size.h));
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
@@ -442,6 +478,14 @@ static void bg_update_proc(Layer *layer, GContext *ctx) {
   }
 }
 
+static enum DialType get_dial_type() {
+#ifdef PBL_ROUND
+  return FONT1_ROUND;
+#else
+  return FONT1;
+#endif
+}
+
 static void draw_dial() {
 #ifdef LOG
   APP_LOG(APP_LOG_LEVEL_INFO, "Drawing dial");
@@ -449,7 +493,8 @@ static void draw_dial() {
   binary_image_mask_data_destroy(dial);
   binary_image_mask_data_destroy(digits);
 
-  DialSpec *ds = get_dial_spec(dial_type);
+  free(ds);
+  ds = get_dial_spec(get_dial_type());
 
   dial = binary_image_mask_data_create(bounds.size);
   digits = binary_image_mask_data_create_from_resource(GSize(ds->digit_size.w * 10, ds->digit_size.h), ds->digit_res);
@@ -509,8 +554,6 @@ static void draw_dial() {
     binary_image_mask_data_destroy(date_box);
   }
 
-  free(ds);
-
   if (settings.EnableDate) {
     update_date();
   }
@@ -544,6 +587,7 @@ static void prv_window_unload(Window *window) {
   layer_destroy(s_bg_layer);
   binary_image_mask_data_destroy(dial);
   binary_image_mask_data_destroy(digits);
+  free(ds);
 }
 
 static void prv_init(void) {
