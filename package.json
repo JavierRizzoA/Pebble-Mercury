@@ -1,0 +1,83 @@
+{
+  "name": "mercury",
+  "author": "Javier Rizzo",
+  "version": "1.0.0",
+  "keywords": [
+    "pebble-app"
+  ],
+  "private": true,
+  "dependencies": {
+    "pebble-clay": "^1.0.4"
+  },
+  "pebble": {
+    "displayName": "Mercury",
+    "uuid": "87f137e2-7c83-47b9-abef-ee0f55c1073c",
+    "sdkVersion": "3",
+    "enableMultiJS": true,
+    "targetPlatforms": [
+      "aplite",
+      "basalt",
+      "diorite"
+    ],
+    "watchapp": {
+      "watchface": true
+    },
+    "capabilities": [
+      "configurable"
+    ],
+    "messageKeys": [
+      "EnableSecondsHand",
+      "EnableDate",
+      "EnablePebbleLogo",
+      "EnableWatchModel",
+      "DigitalWatch",
+      "BackgroundColor1",
+      "BackgroundColor2",
+      "TextColor1",
+      "TextColor2",
+      "HoursHandColor",
+      "HoursHandBorderColor",
+      "MinutesHandColor",
+      "MinutesHandBorderColor",
+      "SecondsHandColor",
+      "BWBackgroundColor1",
+      "BWBackgroundColor2",
+      "BWTextColor1",
+      "BWTextColor2"
+    ],
+    "resources": {
+      "media": [
+        {
+          "type": "raw",
+          "name": "DIAL1",
+          "file": "dial1.bin"
+        },
+        {
+          "type": "raw",
+          "name": "LOGO",
+          "file": "logo.bin"
+        },
+        {
+          "type": "raw",
+          "name": "MODELS",
+          "file": "models.bin"
+        },
+        {
+          "type": "raw",
+          "name": "DATE_BOX1",
+          "file": "date_box1.bin"
+        },
+        {
+          "type": "raw",
+          "name": "DIGITS1",
+          "file": "digits1.bin"
+        },
+        {
+          "type": "raw",
+          "name": "MARKERS1",
+          "file": "markers1.bin"
+        }
+      ]
+    }
+  }
+}
