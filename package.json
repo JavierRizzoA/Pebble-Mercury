@@ -3,7 +3,16 @@
   "author": "Javier Rizzo",
   "version": "1.2.0",
   "keywords": [
-    "pebble-app"
+    "pebble",
+    "watchface",
+    "mercury",
+    "hermes",
+    "apple",
+    "color",
+    "colorful",
+    "geometric",
+    "analog",
+    "digital"
   ],
   "private": true,
   "dependencies": {
