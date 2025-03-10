@@ -49,6 +49,24 @@ module.exports = [
   },
   {
     "type": "section",
+    "items": [
+      {
+        "type": "heading",
+        "defaultValue": "Font"
+      },
+      {
+        "type": "slider",
+        "label": "Font",
+        "messageKey": "Font",
+        "defaultValue": 1,
+        "min": 1,
+        "max": 3,
+        "step": 1
+      }
+    ]
+  },
+  {
+    "type": "section",
     "capabilities": [ "COLOR" ],
     "items": [
       {

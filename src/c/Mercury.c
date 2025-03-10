@@ -65,6 +65,7 @@ static void prv_default_settings(void) {
   settings.BWBackgroundColor2 = GColorBlack;
   settings.BWTextColor1 = GColorBlack;
   settings.BWTextColor2 = GColorWhite;
+  settings.Font = 1;
 }
 
 static void prv_load_settings(void) {
@@ -95,6 +96,7 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
   Tuple *bwbg_color2_t = dict_find(iter, MESSAGE_KEY_BWBackgroundColor2);
   Tuple *bwtext_color1_t = dict_find(iter, MESSAGE_KEY_BWTextColor1);
   Tuple *bwtext_color2_t = dict_find(iter, MESSAGE_KEY_BWTextColor2);
+  Tuple *font_t = dict_find(iter, MESSAGE_KEY_Font);
 
   if(enable_seconds_t) {
     settings.EnableSecondsHand = enable_seconds_t->value->int32 == 1;
@@ -156,6 +158,9 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
   if (bwtext_color2_t) {
     settings.BWTextColor2 = GColorFromHEX(bwtext_color2_t->value->int32);
   }
+  if (font_t) {
+    settings.Font = font_t->value->int32;
+  }
 
   prv_save_settings();
   draw_dial();
@@ -185,13 +190,29 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
   }
 
   if (dial_type == FONT1 || dial_type == FONT1_ROUND) {
-      ds->date_box_size = GSize(34, 22);
-      ds->digit_size = GSize(10, 14);
-      ds->marker_size = GSize(22, 19);
+    ds->date_box_size = GSize(34, 22);
+    ds->digit_size = GSize(10, 14);
+    ds->marker_size = GSize(22, 19);
 
-      ds->date_box_res = RESOURCE_ID_DATE_BOX1;
-      ds->digit_res = RESOURCE_ID_DIGITS1;
-      ds->marker_res = RESOURCE_ID_MARKERS1;
+    ds->date_box_res = RESOURCE_ID_DATE_BOX1;
+    ds->digit_res = RESOURCE_ID_DIGITS1;
+    ds->marker_res = RESOURCE_ID_MARKERS1;
+  } else if (dial_type == FONT2 || dial_type == FONT2_ROUND) {
+    ds->date_box_size = GSize(30, 18);
+    ds->digit_size = GSize(10, 10);
+    ds->marker_size = GSize(22, 15);
+
+    ds->date_box_res = RESOURCE_ID_DATE_BOX2;
+    ds->digit_res = RESOURCE_ID_DIGITS2;
+    ds->marker_res = RESOURCE_ID_MARKERS2;
+  } else if (dial_type == FONT3 || dial_type == FONT3_ROUND) {
+    ds->date_box_size = GSize(30, 17);
+    ds->digit_size = GSize(10, 11);
+    ds->marker_size = GSize(26, 16);
+
+    ds->date_box_res = RESOURCE_ID_DATE_BOX3;
+    ds->digit_res = RESOURCE_ID_DIGITS3;
+    ds->marker_res = RESOURCE_ID_MARKERS3;
   } else {
     free(ds);
     return ds;
@@ -236,6 +257,86 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
       ds->date1 = GPoint(79, 119);
       ds->date2 = GPoint(91, 119);
       ds->date_single = GPoint(85, 119);
+
+      break;
+    case FONT2:
+      ds->markers[0] = GPoint(61, 1);
+      ds->markers[1] = GPoint(105, 1);
+      ds->markers[2] = GPoint(121, 41);
+      ds->markers[3] = GPoint(121, 76);
+      ds->markers[4] = GPoint(121, 112);
+      ds->markers[5] = GPoint(105, 151);
+      ds->markers[6] = GPoint(61, 151);
+      ds->markers[7] = GPoint(17, 151);
+      ds->markers[8] = GPoint(1, 112);
+      ds->markers[9] = GPoint(1, 76);
+      ds->markers[10] = GPoint(1, 41);
+      ds->markers[11] = GPoint(17, 1);
+
+      ds->date_box = GPoint(57, 116);
+      ds->date1 = GPoint(61, 120);
+      ds->date2 = GPoint(73, 120);
+      ds->date_single = GPoint(67, 118);
+
+      break;
+    case FONT2_ROUND:
+      ds->markers[0] = GPoint(79, 5);
+      ds->markers[1] = GPoint(118, 22);
+      ds->markers[2] = GPoint(143, 47);
+      ds->markers[3] = GPoint(152, 82);
+      ds->markers[4] = GPoint(143, 117);
+      ds->markers[5] = GPoint(118, 142);
+      ds->markers[6] = GPoint(79, 161);
+      ds->markers[7] = GPoint(40, 142);
+      ds->markers[8] = GPoint(15, 117);
+      ds->markers[9] = GPoint(6, 82);
+      ds->markers[10] = GPoint(15, 47);
+      ds->markers[11] = GPoint(40, 22);
+
+      ds->date_box = GPoint(75, 117);
+      ds->date1 = GPoint(79, 121);
+      ds->date2 = GPoint(91, 121);
+      ds->date_single = GPoint(85, 121);
+
+      break;
+    case FONT3:
+      ds->markers[0] = GPoint(61, 1);
+      ds->markers[1] = GPoint(105, 1);
+      ds->markers[2] = GPoint(121, 41);
+      ds->markers[3] = GPoint(121, 76);
+      ds->markers[4] = GPoint(121, 112);
+      ds->markers[5] = GPoint(105, 151);
+      ds->markers[6] = GPoint(61, 151);
+      ds->markers[7] = GPoint(17, 151);
+      ds->markers[8] = GPoint(1, 112);
+      ds->markers[9] = GPoint(1, 76);
+      ds->markers[10] = GPoint(1, 41);
+      ds->markers[11] = GPoint(17, 1);
+
+      ds->date_box = GPoint(57, 117);
+      ds->date1 = GPoint(61, 120);
+      ds->date2 = GPoint(73, 120);
+      ds->date_single = GPoint(67, 120);
+
+      break;
+    case FONT3_ROUND:
+      ds->markers[0] = GPoint(79, 5);
+      ds->markers[1] = GPoint(118, 22);
+      ds->markers[2] = GPoint(143, 47);
+      ds->markers[3] = GPoint(152, 82);
+      ds->markers[4] = GPoint(143, 117);
+      ds->markers[5] = GPoint(118, 142);
+      ds->markers[6] = GPoint(79, 161);
+      ds->markers[7] = GPoint(40, 142);
+      ds->markers[8] = GPoint(15, 117);
+      ds->markers[9] = GPoint(6, 82);
+      ds->markers[10] = GPoint(15, 47);
+      ds->markers[11] = GPoint(40, 22);
+
+      ds->date_box = GPoint(75, 118);
+      ds->date1 = GPoint(79, 121);
+      ds->date2 = GPoint(91, 121);
+      ds->date_single = GPoint(85, 121);
 
       break;
     default:
@@ -479,11 +580,32 @@ static void bg_update_proc(Layer *layer, GContext *ctx) {
 }
 
 static enum DialType get_dial_type() {
+  switch (settings.Font) {
+    case 1:
 #ifdef PBL_ROUND
-  return FONT1_ROUND;
+      return FONT1_ROUND;
 #else
-  return FONT1;
+      return FONT1;
 #endif
+    case 2:
+#ifdef PBL_ROUND
+      return FONT2_ROUND;
+#else
+      return FONT2;
+#endif
+    case 3:
+#ifdef PBL_ROUND
+      return FONT3_ROUND;
+#else
+      return FONT3;
+#endif
+    default:
+#ifdef PBL_ROUND
+      return FONT1_ROUND;
+#else
+      return FONT1;
+#endif
+  }
 }
 
 static void draw_dial() {

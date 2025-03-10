@@ -1,7 +1,7 @@
 {
   "name": "mercury",
   "author": "Javier Rizzo",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "keywords": [
     "pebble-app"
   ],
@@ -44,15 +44,11 @@
       "BWBackgroundColor1",
       "BWBackgroundColor2",
       "BWTextColor1",
-      "BWTextColor2"
+      "BWTextColor2",
+      "Font"
     ],
     "resources": {
       "media": [
-        {
-          "type": "raw",
-          "name": "DIAL1",
-          "file": "dial1.bin"
-        },
         {
           "type": "raw",
           "name": "LOGO",
@@ -70,13 +66,43 @@
         },
         {
           "type": "raw",
+          "name": "DATE_BOX2",
+          "file": "date_box2.bin"
+        },
+        {
+          "type": "raw",
+          "name": "DATE_BOX3",
+          "file": "date_box3.bin"
+        },
+        {
+          "type": "raw",
           "name": "DIGITS1",
           "file": "digits1.bin"
         },
         {
           "type": "raw",
+          "name": "DIGITS2",
+          "file": "digits2.bin"
+        },
+        {
+          "type": "raw",
+          "name": "DIGITS3",
+          "file": "digits3.bin"
+        },
+        {
+          "type": "raw",
           "name": "MARKERS1",
           "file": "markers1.bin"
+        },
+        {
+          "type": "raw",
+          "name": "MARKERS2",
+          "file": "markers2.bin"
+        },
+        {
+          "type": "raw",
+          "name": "MARKERS3",
+          "file": "markers3.bin"
         }
       ]
     }

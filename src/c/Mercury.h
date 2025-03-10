@@ -41,6 +41,7 @@ typedef struct ClaySettings {
   bool EnablePebbleLogo;
   bool EnableWatchModel;
   bool DigitalWatch;
+  int Font;
   GColor BackgroundColor1;
   GColor BackgroundColor2;
   GColor TextColor1;
