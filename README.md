@@ -28,8 +28,37 @@ This watchface was made for the
 
 ## Building & Installing from Source
 
+### Encoding the Resources
+
+The watchface reads the assets encoded in binary, so in order to build it you
+first need to encode everything located under `img/resources/*.png` into
+`resources/*.bin`. There's an utility included for that under
+`ImageEncoder/ImageEncoder.py` and a shell script `EncodeImages.sh` that calls
+that script for every needed asset. That way, to encode the images you can just
+do
+
+```
+python -m pip install ImageEncoder/requirements.txt
+./EncodeImages.sh
+```
+
+### Building
+
 ```
 pebble build
+```
+
+### Installing
+
+#### Pebble SDK Emulator
+
+```
+pebble install --emulator [PLATFORM]
+```
+
+#### Phone/Watch
+
+```
 pebble install --phone [PHONE_IP_ADDRESS]
 ```
 
