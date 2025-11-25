@@ -12,13 +12,14 @@ static struct tm *prv_tick_time;
 
 static struct BinaryImageMaskData *dial;
 static struct BinaryImageMaskData *digits;
+static struct BinaryImageMaskData *digits_big;
 static int current_date = -1;
 static ClaySettings settings;
 static DialSpec *ds;
 
-//#define LOG
-//#define LOGTIME
-//#define QUICKTEST
+#define LOG
+#define LOGTIME
+#define QUICKTEST
 
 //#define HOUR 10
 //#define MINUTE 10
@@ -30,6 +31,7 @@ static void prv_default_settings(void);
 static void prv_load_settings(void);
 static void prv_inbox_received_handler(DictionaryIterator *iter, void *context);
 static void update_date();
+static void update_digital_time(struct tm *tick_time);
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed);
 static void draw_fancy_hand(GContext *ctx, int angle, int length, GColor fill_color, GColor border_color);
 static void draw_line_hand(GContext *ctx, int angle, int length, int back_length, GColor color);
@@ -51,7 +53,7 @@ static void prv_default_settings(void) {
   settings.EnableDate = true;
   settings.EnablePebbleLogo = true;
   settings.EnableWatchModel = true;
-  settings.DigitalWatch = false;
+  settings.DigitalWatch = true;
   settings.BackgroundColor1 = GColorCobaltBlue;
   settings.BackgroundColor2 = GColorPastelYellow;
   settings.TextColor1 = GColorWhite;
@@ -177,11 +179,11 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
   ds->logo_res = RESOURCE_ID_LOGO;
   ds->models_res = RESOURCE_ID_MODELS;
 
-  if (dial_type == FONT1 || dial_type == FONT2 || dial_type == FONT3) {
+  if (dial_type == FONT1 || dial_type == FONT2 || dial_type == FONT3 || dial_type == FONT1_DIGITAL || dial_type == FONT2_DIGITAL || dial_type == FONT2_DIGITAL) {
     ds->logo = GPoint(53, 27);
     ds->model = GPoint(36, 40);
   }
-  else if (dial_type == FONT1_ROUND || dial_type == FONT2_ROUND || dial_type == FONT3_ROUND) {
+  else if (dial_type == FONT1_ROUND || dial_type == FONT2_ROUND || dial_type == FONT3_ROUND || dial_type == FONT1_ROUND_DIGITAL || dial_type == FONT2_ROUND_DIGITAL || dial_type == FONT2_ROUND_DIGITAL) {
     ds->logo = GPoint(71, 39);
     ds->model = GPoint(54, 52);
   } else {
@@ -189,7 +191,7 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
     return ds;
   }
 
-  if (dial_type == FONT1 || dial_type == FONT1_ROUND) {
+  if (dial_type == FONT1 || dial_type == FONT1_ROUND || dial_type == FONT1_DIGITAL || dial_type == FONT1_ROUND_DIGITAL) {
     ds->date_box_size = GSize(34, 22);
     ds->digit_size = GSize(10, 14);
     ds->marker_size = GSize(22, 19);
@@ -197,7 +199,15 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
     ds->date_box_res = RESOURCE_ID_DATE_BOX1;
     ds->digit_res = RESOURCE_ID_DIGITS1;
     ds->marker_res = RESOURCE_ID_MARKERS1;
-  } else if (dial_type == FONT2 || dial_type == FONT2_ROUND) {
+
+    ds->digital_box_size = GSize(116, 45);
+    ds->digital_colon_size = GSize(4, 18);
+    ds->digit_big_size = GSize(20, 28);
+
+    ds->digital_box_res = RESOURCE_ID_DIGITAL_BOX1;
+    ds->digital_colon_res = RESOURCE_ID_DIGITAL_COLON1;
+    ds->digit_big_res = RESOURCE_ID_DIGITS_BIG1;
+  } else if (dial_type == FONT2 || dial_type == FONT2_ROUND || dial_type == FONT2_DIGITAL || dial_type == FONT2_ROUND_DIGITAL) {
     ds->date_box_size = GSize(30, 18);
     ds->digit_size = GSize(10, 10);
     ds->marker_size = GSize(22, 15);
@@ -205,7 +215,7 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
     ds->date_box_res = RESOURCE_ID_DATE_BOX2;
     ds->digit_res = RESOURCE_ID_DIGITS2;
     ds->marker_res = RESOURCE_ID_MARKERS2;
-  } else if (dial_type == FONT3 || dial_type == FONT3_ROUND) {
+  } else if (dial_type == FONT3 || dial_type == FONT3_ROUND || dial_type == FONT3_DIGITAL || dial_type == FONT3_ROUND_DIGITAL) {
     ds->date_box_size = GSize(30, 17);
     ds->digit_size = GSize(10, 11);
     ds->marker_size = GSize(26, 16);
@@ -220,6 +230,7 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
 
   switch (dial_type) {
     case FONT1:
+    case FONT1_DIGITAL:
       ds->markers[0] = GPoint(61, 1);
       ds->markers[1] = GPoint(105, 1);
       ds->markers[2] = GPoint(121, 39);
@@ -237,9 +248,16 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
       ds->date1 = GPoint(61, 118);
       ds->date2 = GPoint(73, 118);
       ds->date_single = GPoint(67, 118);
+      ds->digital_box = GPoint(24, 116);
+      ds->digital_time1 = GPoint(32, 124);
+      ds->digital_time2 = GPoint(56, 124);
+      ds->digital_time3 = GPoint(88, 124);
+      ds->digital_time4 = GPoint(112, 124);
+      ds->digital_colon = GPoint(80, 129);
 
       break;
     case FONT1_ROUND:
+    case FONT1_ROUND_DIGITAL:
       ds->markers[0] = GPoint(79, 5);
       ds->markers[1] = GPoint(118, 20);
       ds->markers[2] = GPoint(143, 45);
@@ -260,6 +278,7 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
 
       break;
     case FONT2:
+    case FONT2_DIGITAL:
       ds->markers[0] = GPoint(61, 1);
       ds->markers[1] = GPoint(105, 1);
       ds->markers[2] = GPoint(121, 41);
@@ -280,6 +299,7 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
 
       break;
     case FONT2_ROUND:
+    case FONT2_ROUND_DIGITAL:
       ds->markers[0] = GPoint(79, 5);
       ds->markers[1] = GPoint(118, 22);
       ds->markers[2] = GPoint(143, 47);
@@ -300,6 +320,7 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
 
       break;
     case FONT3:
+    case FONT3_DIGITAL:
       ds->markers[0] = GPoint(61, 1);
       ds->markers[1] = GPoint(105, 1);
       ds->markers[2] = GPoint(121, 41);
@@ -320,6 +341,7 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
 
       break;
     case FONT3_ROUND:
+    case FONT3_ROUND_DIGITAL:
       ds->markers[0] = GPoint(79, 5);
       ds->markers[1] = GPoint(118, 22);
       ds->markers[2] = GPoint(143, 47);
@@ -358,6 +380,47 @@ static void update_date() {
   binary_image_mask_data_draw(dial, digits, ds->date2, GRect(d2*ds->digit_size.w, 0, ds->digit_size.w, ds->digit_size.h));
 }
 
+static void update_digital_time(struct tm *tick_time) {
+#ifdef LOG
+  APP_LOG(APP_LOG_LEVEL_INFO, "Updating Digital Time");
+#endif
+  binary_image_mask_data_clear_region(dial, GRect(ds->digital_time1.x, ds->digital_time1.y, ds->digit_big_size.w, ds->digit_big_size.h));
+  binary_image_mask_data_clear_region(dial, GRect(ds->digital_time2.x, ds->digital_time2.y, ds->digit_big_size.w, ds->digit_big_size.h));
+  binary_image_mask_data_clear_region(dial, GRect(ds->digital_time3.x, ds->digital_time3.y, ds->digit_big_size.w, ds->digit_big_size.h));
+  binary_image_mask_data_clear_region(dial, GRect(ds->digital_time4.x, ds->digital_time4.y, ds->digit_big_size.w, ds->digit_big_size.h));
+
+  int seconds = tick_time->tm_sec;
+  int minutes = prv_tick_time->tm_min;
+  int hours = prv_tick_time->tm_hour; //TODO 12H format
+#ifdef HOUR
+  hours = HOUR;
+#endif
+
+#ifdef MINUTE
+  minutes = MINUTE;
+#endif
+
+#ifdef SECOND
+  seconds = SECOND;
+#endif
+
+#ifdef QUICKTEST
+  minutes = seconds;
+  seconds = 0;
+#endif
+
+  int h1 = hours / 10;
+  int h2 = hours % 10;
+  int m1 = minutes / 10;
+  int m2 = minutes % 10;
+
+
+  binary_image_mask_data_draw(dial, digits_big, ds->digital_time1, GRect(h1*ds->digit_big_size.w, 0, ds->digit_big_size.w, ds->digit_big_size.h));
+  binary_image_mask_data_draw(dial, digits_big, ds->digital_time2, GRect(h2*ds->digit_big_size.w, 0, ds->digit_big_size.w, ds->digit_big_size.h));
+  binary_image_mask_data_draw(dial, digits_big, ds->digital_time3, GRect(m1*ds->digit_big_size.w, 0, ds->digit_big_size.w, ds->digit_big_size.h));
+  binary_image_mask_data_draw(dial, digits_big, ds->digital_time4, GRect(m2*ds->digit_big_size.w, 0, ds->digit_big_size.w, ds->digit_big_size.h));
+}
+
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   time_t temp = time(NULL);
   prv_tick_time = localtime(&temp);
@@ -375,6 +438,10 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
       current_date = date;
       update_date();
     }
+  }
+
+  if (settings.DigitalWatch) {
+    update_digital_time(tick_time);
   }
 
   layer_mark_dirty(s_canvas_layer);
@@ -454,37 +521,40 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
 
 #ifdef QUICKTEST
   minutes = seconds;
+  seconds = 0;
 #endif
 
-  int minutes_angle = ((double)minutes / 60 * 360) + ((double)seconds / 60 * 360 / 60) - 90;
+  if (!settings.DigitalWatch) {
+    int minutes_angle = ((double)minutes / 60 * 360) + ((double)seconds / 60 * 360 / 60) - 90;
 #ifdef PBL_COLOR
-  draw_fancy_hand(ctx, minutes_angle, bounds.size.w / 2 - 10, settings.MinutesHandColor, settings.MinutesHandBorderColor);
+    draw_fancy_hand(ctx, minutes_angle, bounds.size.w / 2 - 10, settings.MinutesHandColor, settings.MinutesHandBorderColor);
 #else
-  draw_fancy_hand(ctx, minutes_angle, bounds.size.w / 2 - 10, GColorWhite, GColorBlack);
+    draw_fancy_hand(ctx, minutes_angle, bounds.size.w / 2 - 10, GColorWhite, GColorBlack);
 #endif
 
-  int hours_angle = ((double)hours / 12 * 360) + ((double)minutes / 60 * 360 / 12) + ((double)seconds / 60 * 360 / 60 / 12)  - 90;
+    int hours_angle = ((double)hours / 12 * 360) + ((double)minutes / 60 * 360 / 12) + ((double)seconds / 60 * 360 / 60 / 12)  - 90;
 
 #ifdef PBL_COLOR
-  draw_fancy_hand(ctx, hours_angle, bounds.size.w / 2 - 30, settings.HoursHandColor, settings.HoursHandBorderColor);
+    draw_fancy_hand(ctx, hours_angle, bounds.size.w / 2 - 30, settings.HoursHandColor, settings.HoursHandBorderColor);
 #else
-  draw_fancy_hand(ctx, hours_angle, bounds.size.w / 2 - 30, GColorWhite, GColorBlack);
+    draw_fancy_hand(ctx, hours_angle, bounds.size.w / 2 - 30, GColorWhite, GColorBlack);
 #endif
 
-  if (settings.EnableSecondsHand) {
-    int seconds_angle = ((double)seconds / 60 * 360) - 90;
+    if (settings.EnableSecondsHand) {
+      int seconds_angle = ((double)seconds / 60 * 360) - 90;
 #ifdef PBL_COLOR
-    draw_line_hand(ctx, seconds_angle, bounds.size.w / 2 - 5, 15, settings.SecondsHandColor);
+      draw_line_hand(ctx, seconds_angle, bounds.size.w / 2 - 5, 15, settings.SecondsHandColor);
 #else
-    draw_line_hand(ctx, seconds_angle, bounds.size.w / 2 - 5, 15, GColorBlack);
+      draw_line_hand(ctx, seconds_angle, bounds.size.w / 2 - 5, 15, GColorBlack);
+#endif
+    }
+
+#ifdef PBL_COLOR
+    draw_center(ctx, settings.HoursHandBorderColor, settings.HoursHandColor, settings.SecondsHandColor);
+#else
+    draw_center(ctx, GColorBlack, GColorWhite, GColorBlack);
 #endif
   }
-
-#ifdef PBL_COLOR
-  draw_center(ctx, settings.HoursHandBorderColor, settings.HoursHandColor, settings.SecondsHandColor);
-#else
-  draw_center(ctx, GColorBlack, GColorWhite, GColorBlack);
-#endif
 }
 
 
@@ -506,6 +576,7 @@ static void bg_update_proc(Layer *layer, GContext *ctx) {
 
 #ifdef QUICKTEST
   minutes = seconds;
+  seconds = 0;
 #endif
 
   int angle = 360 - ((double)minutes / 60 * 360) - ((double)seconds / 60 * 360 / 60) + 90;
@@ -582,29 +653,61 @@ static void bg_update_proc(Layer *layer, GContext *ctx) {
 static enum DialType get_dial_type() {
   switch (settings.Font) {
     case 1:
+      if (!settings.DigitalWatch) {
 #ifdef PBL_ROUND
-      return FONT1_ROUND;
+        return FONT1_ROUND;
 #else
-      return FONT1;
+        return FONT1;
 #endif
+      } else {
+#ifdef PBL_ROUND
+        return FONT1_ROUND_DIGITAL;
+#else
+        return FONT1_DIGITAL;
+#endif
+      }
     case 2:
+      if (!settings.DigitalWatch) {
 #ifdef PBL_ROUND
       return FONT2_ROUND;
 #else
       return FONT2;
 #endif
+      } else {
+#ifdef PBL_ROUND
+      return FONT2_ROUND_DIGITAL;
+#else
+      return FONT2_DIGITAL;
+#endif
+      }
     case 3:
+      if (!settings.DigitalWatch) {
 #ifdef PBL_ROUND
       return FONT3_ROUND;
 #else
       return FONT3;
 #endif
+      } else {
+#ifdef PBL_ROUND
+      return FONT3_ROUND_DIGITAL;
+#else
+      return FONT3_DIGITAL;
+#endif
+      }
     default:
+      if (!settings.DigitalWatch) {
 #ifdef PBL_ROUND
       return FONT1_ROUND;
 #else
       return FONT1;
 #endif
+      } else {
+#ifdef PBL_ROUND
+      return FONT1_ROUND_DIGITAL;
+#else
+      return FONT1_DIGITAL;
+#endif
+      }
   }
 }
 
@@ -620,13 +723,15 @@ static void draw_dial() {
 
   dial = binary_image_mask_data_create(bounds.size);
   digits = binary_image_mask_data_create_from_resource(GSize(ds->digit_size.w * 10, ds->digit_size.h), ds->digit_res);
+  digits_big = binary_image_mask_data_create_from_resource(GSize(ds->digit_big_size.w * 10, ds->digit_big_size.h), ds->digit_big_res);
 
-
-  BinaryImageMaskData *markers = binary_image_mask_data_create_from_resource(GSize(ds->marker_size.w, ds->marker_size.h * 12), ds->marker_res);
-  for (int i = 0; i < 12; i++) {
-    binary_image_mask_data_draw(dial, markers, ds->markers[i], GRect(0, ds->marker_size.h * i, ds->marker_size.w, ds->marker_size.h));
+  if (!settings.DigitalWatch) {
+    BinaryImageMaskData *markers = binary_image_mask_data_create_from_resource(GSize(ds->marker_size.w, ds->marker_size.h * 12), ds->marker_res);
+    for (int i = 0; i < 12; i++) {
+      binary_image_mask_data_draw(dial, markers, ds->markers[i], GRect(0, ds->marker_size.h * i, ds->marker_size.w, ds->marker_size.h));
+    }
+    binary_image_mask_data_destroy(markers);
   }
-  binary_image_mask_data_destroy(markers);
 
 
   if (settings.EnablePebbleLogo) {
@@ -670,14 +775,24 @@ static void draw_dial() {
     binary_image_mask_data_destroy(models);
   }
 
-  if (settings.EnableDate) {
+  if (settings.EnableDate && !settings.DigitalWatch) {
     BinaryImageMaskData *date_box = binary_image_mask_data_create_from_resource(ds->date_box_size, ds->date_box_res);
     binary_image_mask_data_draw(dial, date_box, ds->date_box, GRect(0, 0, ds->date_box_size.w, ds->date_box_size.h));
     binary_image_mask_data_destroy(date_box);
   }
 
-  if (settings.EnableDate) {
+  if (settings.EnableDate && !settings.DigitalWatch) {
     update_date();
+  }
+
+  if (settings.DigitalWatch) {
+    BinaryImageMaskData *digital_box = binary_image_mask_data_create_from_resource(ds->digital_box_size, ds->digital_box_res);
+    binary_image_mask_data_draw(dial, digital_box, ds->digital_box, GRect(0, 0, ds->digital_box_size.w, ds->digital_box_size.h));
+    binary_image_mask_data_destroy(digital_box);
+
+    BinaryImageMaskData *digital_colon = binary_image_mask_data_create_from_resource(ds->digital_colon_size, ds->digital_colon_res);
+    binary_image_mask_data_draw(dial, digital_colon, ds->digital_colon, GRect(0, 0, ds->digital_colon_size.w, ds->digital_colon_size.h));
+    binary_image_mask_data_destroy(digital_colon);
   }
 }
 

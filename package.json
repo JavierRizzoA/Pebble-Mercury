@@ -85,6 +85,26 @@
         },
         {
           "type": "raw",
+          "name": "DIGITAL_BOX1",
+          "file": "digital_box1.bin"
+        },
+        {
+          "type": "raw",
+          "name": "DIGITAL_BOX2",
+          "file": "digital_box2.bin"
+        },
+        {
+          "type": "raw",
+          "name": "DIGITAL_BOX3",
+          "file": "digital_box3.bin"
+        },
+        {
+          "type": "raw",
+          "name": "DIGITAL_COLON1",
+          "file": "digital_colon1.bin"
+        },
+        {
+          "type": "raw",
           "name": "DIGITS1",
           "file": "digits1.bin"
         },
@@ -97,6 +117,21 @@
           "type": "raw",
           "name": "DIGITS3",
           "file": "digits3.bin"
+        },
+        {
+          "type": "raw",
+          "name": "DIGITS_BIG1",
+          "file": "digits_big1.bin"
+        },
+        {
+          "type": "raw",
+          "name": "DIGITS_BIG2",
+          "file": "digits_big2.bin"
+        },
+        {
+          "type": "raw",
+          "name": "DIGITS_BIG3",
+          "file": "digits_big3.bin"
         },
         {
           "type": "raw",
