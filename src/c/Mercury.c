@@ -302,12 +302,21 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
 
       ds->date_box = GPoint(73, 115);
       ds->date_single = GPoint(85, 119);
-      ds->day = GPoint(67, 105);
+      ds->day = GPoint(75, 101);
       if (!is_digital(dial_type)) {
         ds->date1 = GPoint(79, 119);
         ds->date2 = GPoint(91, 119);
       } else {
+        ds->date1 = GPoint(115, 97);
+        ds->date2 = GPoint(127, 97);
       }
+
+      ds->digital_box = GPoint(32, 112);
+      ds->digital_time1 = GPoint(40, 120);
+      ds->digital_time2 = GPoint(64, 120);
+      ds->digital_time3 = GPoint(96, 120);
+      ds->digital_time4 = GPoint(120, 120);
+      ds->digital_colon = GPoint(88, 124);
 
       break;
     case FONT2:
@@ -361,12 +370,21 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
 
       ds->date_box = GPoint(75, 117);
       ds->date_single = GPoint(85, 121);
-      ds->day = GPoint(67, 105);
+      ds->day = GPoint(75, 105);
       if (!is_digital(dial_type)) {
         ds->date1 = GPoint(79, 121);
         ds->date2 = GPoint(91, 121);
       } else {
+        ds->date1 = GPoint(115, 105);
+        ds->date2 = GPoint(127, 105);
       }
+
+      ds->digital_box = GPoint(36, 116);
+      ds->digital_time1 = GPoint(45, 124);
+      ds->digital_time2 = GPoint(67, 124);
+      ds->digital_time3 = GPoint(93, 124);
+      ds->digital_time4 = GPoint(115, 124);
+      ds->digital_colon = GPoint(89, 128);
 
       break;
     case FONT3:
@@ -420,12 +438,21 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
 
       ds->date_box = GPoint(75, 118);
       ds->date_single = GPoint(85, 121);
-      ds->day = GPoint(67, 105);
+      ds->day = GPoint(74, 106);
       if (!is_digital(dial_type)) {
         ds->date1 = GPoint(79, 121);
         ds->date2 = GPoint(91, 121);
       } else {
+        ds->date1 = GPoint(115, 105);
+        ds->date2 = GPoint(127, 105);
       }
+
+      ds->digital_box = GPoint(36, 117);
+      ds->digital_time1 = GPoint(45, 123);
+      ds->digital_time2 = GPoint(67, 123);
+      ds->digital_time3 = GPoint(93, 123);
+      ds->digital_time4 = GPoint(115, 123);
+      ds->digital_colon = GPoint(89, 127);
 
       break;
     default:
