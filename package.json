@@ -157,6 +157,11 @@
           "type": "raw",
           "name": "MARKERS3",
           "file": "markers3.bin"
+        },
+        {
+          "type": "raw",
+          "name": "DAYS",
+          "file": "days.bin"
         }
       ]
     }

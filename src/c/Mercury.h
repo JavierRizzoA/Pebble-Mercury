@@ -18,6 +18,7 @@ typedef struct DialSpec {
   GPoint digital_time3;
   GPoint digital_time4;
   GPoint digital_colon;
+  GPoint day;
 
   GSize marker_size;
   GSize digit_size;
@@ -27,6 +28,7 @@ typedef struct DialSpec {
   GSize digit_big_size;
   GSize digital_box_size;
   GSize digital_colon_size;
+  GSize day_size;
 
   uint32_t marker_res;
   uint32_t digit_res;
@@ -36,6 +38,7 @@ typedef struct DialSpec {
   uint32_t digital_box_res;
   uint32_t digital_colon_res;
   uint32_t digit_big_res;
+  uint32_t day_res;
 } __attribute__((__packed__)) DialSpec;
 
 enum DialType {
