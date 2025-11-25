@@ -105,6 +105,16 @@
         },
         {
           "type": "raw",
+          "name": "DIGITAL_COLON2",
+          "file": "digital_colon2.bin"
+        },
+        {
+          "type": "raw",
+          "name": "DIGITAL_COLON3",
+          "file": "digital_colon3.bin"
+        },
+        {
+          "type": "raw",
           "name": "DIGITS1",
           "file": "digits1.bin"
         },

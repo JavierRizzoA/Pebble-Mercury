@@ -17,9 +17,9 @@ static int current_date = -1;
 static ClaySettings settings;
 static DialSpec *ds;
 
-#define LOG
-#define LOGTIME
-#define QUICKTEST
+//#define LOG
+//#define LOGTIME
+//#define QUICKTEST
 
 //#define HOUR 10
 //#define MINUTE 10
@@ -43,6 +43,9 @@ static void prv_window_load(Window *window);
 static void prv_window_unload(Window *window);
 static void prv_init(void);
 static void prv_deinit(void);
+static int get_font(enum DialType dial_type);
+static bool is_digital(enum DialType dial_type);
+static bool is_round(enum DialType dial_type);
 
 static void prv_save_settings(void) {
   persist_write_data(SETTINGS_KEY, &settings, sizeof(settings));
@@ -67,7 +70,7 @@ static void prv_default_settings(void) {
   settings.BWBackgroundColor2 = GColorBlack;
   settings.BWTextColor1 = GColorBlack;
   settings.BWTextColor2 = GColorWhite;
-  settings.Font = 1;
+  settings.Font = 3;
 }
 
 static void prv_load_settings(void) {
@@ -179,19 +182,16 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
   ds->logo_res = RESOURCE_ID_LOGO;
   ds->models_res = RESOURCE_ID_MODELS;
 
-  if (dial_type == FONT1 || dial_type == FONT2 || dial_type == FONT3 || dial_type == FONT1_DIGITAL || dial_type == FONT2_DIGITAL || dial_type == FONT2_DIGITAL) {
+  if (!is_round(dial_type)) {
     ds->logo = GPoint(53, 27);
     ds->model = GPoint(36, 40);
   }
-  else if (dial_type == FONT1_ROUND || dial_type == FONT2_ROUND || dial_type == FONT3_ROUND || dial_type == FONT1_ROUND_DIGITAL || dial_type == FONT2_ROUND_DIGITAL || dial_type == FONT2_ROUND_DIGITAL) {
+  else {
     ds->logo = GPoint(71, 39);
     ds->model = GPoint(54, 52);
-  } else {
-    free(ds);
-    return ds;
   }
 
-  if (dial_type == FONT1 || dial_type == FONT1_ROUND || dial_type == FONT1_DIGITAL || dial_type == FONT1_ROUND_DIGITAL) {
+  if (get_font(dial_type) == 1) {
     ds->date_box_size = GSize(34, 22);
     ds->digit_size = GSize(10, 14);
     ds->marker_size = GSize(22, 19);
@@ -201,13 +201,13 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
     ds->marker_res = RESOURCE_ID_MARKERS1;
 
     ds->digital_box_size = GSize(116, 45);
-    ds->digital_colon_size = GSize(4, 18);
+    ds->digital_colon_size = GSize(4, 20);
     ds->digit_big_size = GSize(20, 28);
 
     ds->digital_box_res = RESOURCE_ID_DIGITAL_BOX1;
     ds->digital_colon_res = RESOURCE_ID_DIGITAL_COLON1;
     ds->digit_big_res = RESOURCE_ID_DIGITS_BIG1;
-  } else if (dial_type == FONT2 || dial_type == FONT2_ROUND || dial_type == FONT2_DIGITAL || dial_type == FONT2_ROUND_DIGITAL) {
+  } else if (get_font(dial_type) == 2) {
     ds->date_box_size = GSize(30, 18);
     ds->digit_size = GSize(10, 10);
     ds->marker_size = GSize(22, 15);
@@ -215,7 +215,15 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
     ds->date_box_res = RESOURCE_ID_DATE_BOX2;
     ds->digit_res = RESOURCE_ID_DIGITS2;
     ds->marker_res = RESOURCE_ID_MARKERS2;
-  } else if (dial_type == FONT3 || dial_type == FONT3_ROUND || dial_type == FONT3_DIGITAL || dial_type == FONT3_ROUND_DIGITAL) {
+
+    ds->digital_box_size = GSize(108, 36);
+    ds->digital_colon_size = GSize(2, 12);
+    ds->digit_big_size = GSize(20, 20);
+
+    ds->digital_box_res = RESOURCE_ID_DIGITAL_BOX2;
+    ds->digital_colon_res = RESOURCE_ID_DIGITAL_COLON2;
+    ds->digit_big_res = RESOURCE_ID_DIGITS_BIG2;
+  } else if (get_font(dial_type) == 3) {
     ds->date_box_size = GSize(30, 17);
     ds->digit_size = GSize(10, 11);
     ds->marker_size = GSize(26, 16);
@@ -223,6 +231,14 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
     ds->date_box_res = RESOURCE_ID_DATE_BOX3;
     ds->digit_res = RESOURCE_ID_DIGITS3;
     ds->marker_res = RESOURCE_ID_MARKERS3;
+
+    ds->digital_box_size = GSize(108, 34);
+    ds->digital_colon_size = GSize(2, 14);
+    ds->digit_big_size = GSize(20, 22);
+
+    ds->digital_box_res = RESOURCE_ID_DIGITAL_BOX3;
+    ds->digital_colon_res = RESOURCE_ID_DIGITAL_COLON3;
+    ds->digit_big_res = RESOURCE_ID_DIGITS_BIG3;
   } else {
     free(ds);
     return ds;
@@ -248,12 +264,13 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
       ds->date1 = GPoint(61, 118);
       ds->date2 = GPoint(73, 118);
       ds->date_single = GPoint(67, 118);
+
       ds->digital_box = GPoint(24, 116);
       ds->digital_time1 = GPoint(32, 124);
       ds->digital_time2 = GPoint(56, 124);
       ds->digital_time3 = GPoint(88, 124);
       ds->digital_time4 = GPoint(112, 124);
-      ds->digital_colon = GPoint(80, 129);
+      ds->digital_colon = GPoint(80, 128);
 
       break;
     case FONT1_ROUND:
@@ -297,6 +314,13 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
       ds->date2 = GPoint(73, 120);
       ds->date_single = GPoint(67, 118);
 
+      ds->digital_box = GPoint(28, 120);
+      ds->digital_time1 = GPoint(37, 128);
+      ds->digital_time2 = GPoint(59, 128);
+      ds->digital_time3 = GPoint(85, 128);
+      ds->digital_time4 = GPoint(107, 128);
+      ds->digital_colon = GPoint(81, 132);
+
       break;
     case FONT2_ROUND:
     case FONT2_ROUND_DIGITAL:
@@ -339,6 +363,13 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
       ds->date2 = GPoint(73, 120);
       ds->date_single = GPoint(67, 120);
 
+      ds->digital_box = GPoint(28, 121);
+      ds->digital_time1 = GPoint(37, 127);
+      ds->digital_time2 = GPoint(59, 127);
+      ds->digital_time3 = GPoint(85, 127);
+      ds->digital_time4 = GPoint(107, 127);
+      ds->digital_colon = GPoint(81, 131);
+
       break;
     case FONT3_ROUND:
     case FONT3_ROUND_DIGITAL:
@@ -366,6 +397,71 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
       break;
   }
   return ds;
+}
+
+
+static int get_font(enum DialType dial_type) {
+  switch(dial_type) {
+    case FONT1:
+    case FONT1_ROUND:
+    case FONT1_DIGITAL:
+    case FONT1_ROUND_DIGITAL:
+      return 1;
+    case FONT2:
+    case FONT2_ROUND:
+    case FONT2_DIGITAL:
+    case FONT2_ROUND_DIGITAL:
+      return 2;
+    case FONT3:
+    case FONT3_ROUND:
+    case FONT3_DIGITAL:
+    case FONT3_ROUND_DIGITAL:
+      return 3;
+    default:
+      return -1;
+  }
+}
+
+static bool is_digital(enum DialType dial_type) {
+  switch(dial_type) {
+    case FONT1:
+    case FONT1_ROUND:
+    case FONT2:
+    case FONT2_ROUND:
+    case FONT3:
+    case FONT3_ROUND:
+      return false;
+    case FONT1_DIGITAL:
+    case FONT1_ROUND_DIGITAL:
+    case FONT2_DIGITAL:
+    case FONT2_ROUND_DIGITAL:
+    case FONT3_DIGITAL:
+    case FONT3_ROUND_DIGITAL:
+      return true;
+    default:
+      return false;
+  }
+}
+
+static bool is_round(enum DialType dial_type) {
+  switch(dial_type) {
+    case FONT1:
+    case FONT1_DIGITAL:
+    case FONT2:
+    case FONT2_DIGITAL:
+    case FONT3:
+    case FONT3_DIGITAL:
+      return false;
+    case FONT1_ROUND:
+    case FONT1_ROUND_DIGITAL:
+    case FONT2_ROUND:
+    case FONT2_ROUND_DIGITAL:
+    case FONT3_ROUND:
+    case FONT3_ROUND_DIGITAL:
+      return true;
+    default:
+      return false;
+  }
 }
 
 static void update_date() {

@@ -16,3 +16,5 @@
 ./ImageEncoder/ImageEncoder.py --input img/resources/markers3.png --output resources/markers3.bin --invert
 ./ImageEncoder/ImageEncoder.py --input img/resources/models.png --output resources/models.bin --invert
 ./ImageEncoder/ImageEncoder.py --input img/resources/digital_colon1.png --output resources/digital_colon1.bin --invert
+./ImageEncoder/ImageEncoder.py --input img/resources/digital_colon2.png --output resources/digital_colon2.bin --invert
+./ImageEncoder/ImageEncoder.py --input img/resources/digital_colon3.png --output resources/digital_colon3.bin --invert
