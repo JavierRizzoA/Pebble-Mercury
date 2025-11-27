@@ -586,7 +586,15 @@ static void update_digital_time(struct tm *tick_time) {
   int seconds = tick_time->tm_sec;
 #endif
   int minutes = prv_tick_time->tm_min;
-  int hours = prv_tick_time->tm_hour; //TODO 12H format
+  int hours = prv_tick_time->tm_hour;
+
+  if (!clock_is_24h_style()) {
+    hours = hours % 12;
+
+    if (hours == 0) {
+      hours = 12;
+    }
+  }
 #ifdef HOUR
   hours = HOUR;
 #endif
