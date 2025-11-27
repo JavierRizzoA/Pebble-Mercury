@@ -987,6 +987,13 @@ static void draw_dial() {
       case WATCH_INFO_MODEL_PEBBLE_2_SE:
         index = 7;
         break;
+        // There's a bug in the SDK that requires this preprocessor condition
+        // https://discord.com/channels/221364737269694464/264746316477759489/1443423122517921844
+#ifndef PBL_PLATFORM_APLITE
+      case WATCH_INFO_MODEL_COREDEVICES_C2D:
+        index = 9;
+        break;
+#endif
       default:
         index = 8;
         break;
