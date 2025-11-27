@@ -1,12 +1,21 @@
 ./ImageEncoder/ImageEncoder.py --input img/resources/date_box1.png --output resources/date_box1.bin --invert
 ./ImageEncoder/ImageEncoder.py --input img/resources/date_box2.png --output resources/date_box2.bin --invert
 ./ImageEncoder/ImageEncoder.py --input img/resources/date_box3.png --output resources/date_box3.bin --invert
+./ImageEncoder/ImageEncoder.py --input img/resources/digital_box1.png --output resources/digital_box1.bin --invert
+./ImageEncoder/ImageEncoder.py --input img/resources/digital_box2.png --output resources/digital_box2.bin --invert
+./ImageEncoder/ImageEncoder.py --input img/resources/digital_box3.png --output resources/digital_box3.bin --invert
 ./ImageEncoder/ImageEncoder.py --input img/resources/digits1.png --output resources/digits1.bin --invert
 ./ImageEncoder/ImageEncoder.py --input img/resources/digits2.png --output resources/digits2.bin --invert
 ./ImageEncoder/ImageEncoder.py --input img/resources/digits3.png --output resources/digits3.bin --invert
+./ImageEncoder/ImageEncoder.py --input img/resources/digits_big1.png --output resources/digits_big1.bin --invert
+./ImageEncoder/ImageEncoder.py --input img/resources/digits_big2.png --output resources/digits_big2.bin --invert
+./ImageEncoder/ImageEncoder.py --input img/resources/digits_big3.png --output resources/digits_big3.bin --invert
 ./ImageEncoder/ImageEncoder.py --input img/resources/logo.png --output resources/logo.bin --invert
 ./ImageEncoder/ImageEncoder.py --input img/resources/markers1.png --output resources/markers1.bin --invert
 ./ImageEncoder/ImageEncoder.py --input img/resources/markers2.png --output resources/markers2.bin --invert
 ./ImageEncoder/ImageEncoder.py --input img/resources/markers3.png --output resources/markers3.bin --invert
 ./ImageEncoder/ImageEncoder.py --input img/resources/models.png --output resources/models.bin --invert
-
+./ImageEncoder/ImageEncoder.py --input img/resources/digital_colon1.png --output resources/digital_colon1.bin --invert
+./ImageEncoder/ImageEncoder.py --input img/resources/digital_colon2.png --output resources/digital_colon2.bin --invert
+./ImageEncoder/ImageEncoder.py --input img/resources/digital_colon3.png --output resources/digital_colon3.bin --invert
+./ImageEncoder/ImageEncoder.py --input img/resources/days.png --output resources/days.bin --invert

@@ -4,6 +4,8 @@
 
 A watchface for the Pebble Smartwatch.
 
+The background gradient follows the minutes hand.
+
 Inspired by the Hermes watchface for the Apple Watch.
 
 This watchface was made for the
@@ -11,11 +13,12 @@ This watchface was made for the
 
 ## Screenshots
 
-| Aplite                                 | Basalt                                 | Chalk                                   | Diorite                                  |
-| -------------------------------------  | -------------------------------------  | --------------------------------------- | ---------------------------------------  |
-| ![Aplite](img/screenshots/aplite.png)  | ![Basalt](img/screenshots/basalt.png)  | ![Chalk](img/screenshots/chalk.png)     | ![Diorite](img/screenshots/diorite.png)  |
-| ![Aplite](img/screenshots/aplite2.png) | ![Basalt](img/screenshots/basalt2.png) | ![Chalk](img/screenshots/chalk2.png)    | ![Diorite](img/screenshots/diorite2.png) |
-| ![Aplite](img/screenshots/aplite3.png) | ![Basalt](img/screenshots/basalt3.png) | ![Chalk](img/screenshots/chalk3.png)    | ![Diorite](img/screenshots/diorite3.png) |
+| Aplite/Diorite/Flint                                  | Basalt                                 | Chalk                                   |
+| ----------------------------------------------------- | -------------------------------------  | --------------------------------------- |
+| ![Aplite/Diorite/Flint](img/screenshots/diorite1.png) | ![Basalt](img/screenshots/basalt1.png) | ![Chalk](img/screenshots/chalk1.png)    |
+| ![Aplite/Diorite/Flint](img/screenshots/diorite2.png) | ![Basalt](img/screenshots/basalt2.png) | ![Chalk](img/screenshots/chalk2.png)    |
+| ![Aplite/Diorite/Flint](img/screenshots/diorite3.png) | ![Basalt](img/screenshots/basalt3.png) | ![Chalk](img/screenshots/chalk3.png)    |
+| ![Aplite/Diorite/Flint](img/screenshots/diorite4.png) | ![Basalt](img/screenshots/basalt4.png) | ![Chalk](img/screenshots/chalk4.png)    |
 
 ## Installing
 
@@ -60,6 +63,12 @@ pebble install --emulator [PLATFORM]
 
 ```
 pebble install --phone [PHONE_IP_ADDRESS]
+```
+
+## Generating Screenshots
+
+```
+./GenerateScreenshots.sh
 ```
 
 ## Acknowledgements
