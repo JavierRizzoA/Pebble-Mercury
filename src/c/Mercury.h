@@ -1,7 +1,7 @@
 #pragma once
 #include <pebble.h>
 
-#define MODEL_COUNT 9
+#define MODEL_COUNT 10
 #define SETTINGS_KEY 1
 
 typedef struct DialSpec {
