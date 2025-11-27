@@ -40,8 +40,7 @@ module.exports = [
       },
       {
         "type": "toggle",
-        "label": "Digital",
-        "description": "Currently a placeholder setting. Not implemented yet.",
+        "label": "Digital watch",
         "messageKey": "DigitalWatch",
         "defaultValue": false
       }

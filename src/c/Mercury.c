@@ -22,9 +22,27 @@ static DialSpec *ds;
 //#define LOGTIME
 //#define QUICKTEST
 
-//#define HOUR 10
-//#define MINUTE 10
+//#define HOUR 22
+//#define MINUTE 6
 //#define SECOND 30
+//#define DAY 6
+//#define DATE 6
+
+//#define DIGITAL true
+//#define FONT 1
+//#define BGC1 GColorCobaltBlue
+//#define BGC2 GColorPastelYellow
+//#define TC1 GColorWhite
+//#define TC2 GColorOrange
+//#define HHC GColorWhite
+//#define HHBC GColorBlack
+//#define MHC GColorWhite
+//#define MHBC GColorBlack
+//#define SHC GColorOrange
+//#define BWBGC1 GColorWhite
+//#define BWBGC2 GColorBlack
+//#define BWTC1 GColorBlack
+//#define BWTC2 GColorWhite
 
 
 static void prv_save_settings(void);
@@ -44,12 +62,9 @@ static void prv_window_load(Window *window);
 static void prv_window_unload(Window *window);
 static void prv_init(void);
 static void prv_deinit(void);
-static int get_font(enum DialType dial_type);
-static bool is_digital(enum DialType dial_type);
-static bool is_round(enum DialType dial_type);
-static int get_font2();
-static bool is_digital2();
-static bool is_round2();
+static int get_font();
+static bool is_digital();
+static bool is_round();
 
 static void prv_save_settings(void) {
   persist_write_data(SETTINGS_KEY, &settings, sizeof(settings));
@@ -60,21 +75,81 @@ static void prv_default_settings(void) {
   settings.EnableDate = true;
   settings.EnablePebbleLogo = true;
   settings.EnableWatchModel = true;
-  settings.DigitalWatch = true;
+#ifdef DIGITAL
+  settings.DigitalWatch = DIGITAL;
+#else
+  settings.DigitalWatch = false;
+#endif
+#ifdef BGC1
+  settings.BackgroundColor1 = BGC1;
+#else
   settings.BackgroundColor1 = GColorCobaltBlue;
+#endif
+#ifdef BGC2
+  settings.BackgroundColor2 = BGC2;
+#else
   settings.BackgroundColor2 = GColorPastelYellow;
+#endif
+#ifdef TC1
+  settings.TextColor1 = TC1;
+#else
   settings.TextColor1 = GColorWhite;
+#endif
+#ifdef TC2
+  settings.TextColor2 = TC2;
+#else
   settings.TextColor2 = GColorOrange;
+#endif
+#ifdef HHC
+  settings.HoursHandColor = HHC;
+#else
   settings.HoursHandColor = GColorWhite;
+#endif
+#ifdef HHBC
+  settings.HoursHandBorderColor = HHBC;
+#else
   settings.HoursHandBorderColor = GColorBlack;
+#endif
+#ifdef MHC
+  settings.MinutesHandColor = MHC;
+#else
   settings.MinutesHandColor = GColorWhite;
+#endif
+#ifdef MHBC
+  settings.MinutesHandBorderColor = MHBC;
+#else
   settings.MinutesHandBorderColor = GColorBlack;
+#endif
+#ifdef SHC
+  settings.SecondsHandColor = SHC;
+#else
   settings.SecondsHandColor = GColorOrange;
+#endif
+#ifdef BWBGC1
+  settings.BWBackgroundColor1 = BWBGC1;
+#else
   settings.BWBackgroundColor1 = GColorWhite;
+#endif
+#ifdef BWBGC2
+  settings.BWBackgroundColor2 = BWBGC2;
+#else
   settings.BWBackgroundColor2 = GColorBlack;
+#endif
+#ifdef BWTC1
+  settings.BWTextColor1 = BWTC1;
+#else
   settings.BWTextColor1 = GColorBlack;
+#endif
+#ifdef BWTC2
+  settings.BWTextColor2 = BWTC2;
+#else
   settings.BWTextColor2 = GColorWhite;
+#endif
+#ifdef FONT
+  settings.Font = FONT;
+#else
   settings.Font = 1;
+#endif
 }
 
 static void prv_load_settings(void) {
@@ -110,7 +185,7 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
   if(enable_seconds_t) {
     settings.EnableSecondsHand = enable_seconds_t->value->int32 == 1;
     tick_timer_service_unsubscribe();
-    if (settings.EnableSecondsHand) {
+    if (settings.EnableSecondsHand && !settings.DigitalWatch) {
       tick_timer_service_subscribe(SECOND_UNIT, tick_handler);
     } else {
       tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
@@ -188,7 +263,7 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
   ds->models_res = RESOURCE_ID_MODELS;
   ds->day_res = RESOURCE_ID_DAYS;
 
-  if (!is_round(dial_type)) {
+  if (!is_round()) {
     ds->logo = GPoint(53, 27);
     ds->model = GPoint(36, 40);
   }
@@ -197,7 +272,7 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
     ds->model = GPoint(54, 52);
   }
 
-  if (get_font(dial_type) == 1) {
+  if (get_font() == 1) {
     ds->date_box_size = GSize(34, 22);
     ds->digit_size = GSize(10, 14);
     ds->marker_size = GSize(22, 19);
@@ -213,7 +288,7 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
     ds->digital_box_res = RESOURCE_ID_DIGITAL_BOX1;
     ds->digital_colon_res = RESOURCE_ID_DIGITAL_COLON1;
     ds->digit_big_res = RESOURCE_ID_DIGITS_BIG1;
-  } else if (get_font(dial_type) == 2) {
+  } else if (get_font() == 2) {
     ds->date_box_size = GSize(30, 18);
     ds->digit_size = GSize(10, 10);
     ds->marker_size = GSize(22, 15);
@@ -229,7 +304,7 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
     ds->digital_box_res = RESOURCE_ID_DIGITAL_BOX2;
     ds->digital_colon_res = RESOURCE_ID_DIGITAL_COLON2;
     ds->digit_big_res = RESOURCE_ID_DIGITS_BIG2;
-  } else if (get_font(dial_type) == 3) {
+  } else if (get_font() == 3) {
     ds->date_box_size = GSize(30, 17);
     ds->digit_size = GSize(10, 11);
     ds->marker_size = GSize(26, 16);
@@ -269,7 +344,7 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
       ds->date_box = GPoint(55, 114);
       ds->date_single = GPoint(67, 118);
       ds->day = GPoint(67, 105);
-      if (!is_digital(dial_type)) {
+      if (!is_digital()) {
         ds->date1 = GPoint(61, 118);
         ds->date2 = GPoint(73, 118);
       } else {
@@ -302,21 +377,21 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
 
       ds->date_box = GPoint(73, 115);
       ds->date_single = GPoint(85, 119);
-      ds->day = GPoint(75, 101);
-      if (!is_digital(dial_type)) {
+      ds->day = GPoint(59, 94);
+      if (!is_digital()) {
         ds->date1 = GPoint(79, 119);
         ds->date2 = GPoint(91, 119);
       } else {
-        ds->date1 = GPoint(115, 97);
-        ds->date2 = GPoint(127, 97);
+        ds->date1 = GPoint(99, 90);
+        ds->date2 = GPoint(111, 90);
       }
 
-      ds->digital_box = GPoint(32, 112);
-      ds->digital_time1 = GPoint(40, 120);
-      ds->digital_time2 = GPoint(64, 120);
-      ds->digital_time3 = GPoint(96, 120);
-      ds->digital_time4 = GPoint(120, 120);
-      ds->digital_colon = GPoint(88, 124);
+      ds->digital_box = GPoint(32, 105);
+      ds->digital_time1 = GPoint(40, 113);
+      ds->digital_time2 = GPoint(64, 113);
+      ds->digital_time3 = GPoint(96, 113);
+      ds->digital_time4 = GPoint(120, 113);
+      ds->digital_colon = GPoint(88, 117);
 
       break;
     case FONT2:
@@ -337,7 +412,7 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
       ds->date_box = GPoint(57, 116);
       ds->date_single = GPoint(67, 118);
       ds->day = GPoint(67, 109);
-      if (!is_digital(dial_type)) {
+      if (!is_digital()) {
         ds->date1 = GPoint(61, 120);
         ds->date2 = GPoint(73, 120);
       } else {
@@ -370,21 +445,21 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
 
       ds->date_box = GPoint(75, 117);
       ds->date_single = GPoint(85, 121);
-      ds->day = GPoint(75, 105);
-      if (!is_digital(dial_type)) {
+      ds->day = GPoint(59, 98);
+      if (!is_digital()) {
         ds->date1 = GPoint(79, 121);
         ds->date2 = GPoint(91, 121);
       } else {
-        ds->date1 = GPoint(115, 105);
-        ds->date2 = GPoint(127, 105);
+        ds->date1 = GPoint(99, 98);
+        ds->date2 = GPoint(111, 98);
       }
 
-      ds->digital_box = GPoint(36, 116);
-      ds->digital_time1 = GPoint(45, 124);
-      ds->digital_time2 = GPoint(67, 124);
-      ds->digital_time3 = GPoint(93, 124);
-      ds->digital_time4 = GPoint(115, 124);
-      ds->digital_colon = GPoint(89, 128);
+      ds->digital_box = GPoint(36, 109);
+      ds->digital_time1 = GPoint(45, 117);
+      ds->digital_time2 = GPoint(67, 117);
+      ds->digital_time3 = GPoint(93, 117);
+      ds->digital_time4 = GPoint(115, 117);
+      ds->digital_colon = GPoint(89, 121);
 
       break;
     case FONT3:
@@ -405,7 +480,7 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
       ds->date_box = GPoint(57, 117);
       ds->date_single = GPoint(67, 120);
       ds->day = GPoint(66, 110);
-      if (!is_digital(dial_type)) {
+      if (!is_digital()) {
         ds->date1 = GPoint(61, 120);
         ds->date2 = GPoint(73, 120);
       } else {
@@ -438,21 +513,21 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
 
       ds->date_box = GPoint(75, 118);
       ds->date_single = GPoint(85, 121);
-      ds->day = GPoint(74, 106);
-      if (!is_digital(dial_type)) {
+      ds->day = GPoint(59, 99);
+      if (!is_digital()) {
         ds->date1 = GPoint(79, 121);
         ds->date2 = GPoint(91, 121);
       } else {
-        ds->date1 = GPoint(115, 105);
-        ds->date2 = GPoint(127, 105);
+        ds->date1 = GPoint(99, 98);
+        ds->date2 = GPoint(111, 98);
       }
 
-      ds->digital_box = GPoint(36, 117);
-      ds->digital_time1 = GPoint(45, 123);
-      ds->digital_time2 = GPoint(67, 123);
-      ds->digital_time3 = GPoint(93, 123);
-      ds->digital_time4 = GPoint(115, 123);
-      ds->digital_colon = GPoint(89, 127);
+      ds->digital_box = GPoint(36, 110);
+      ds->digital_time1 = GPoint(45, 116);
+      ds->digital_time2 = GPoint(67, 116);
+      ds->digital_time3 = GPoint(93, 116);
+      ds->digital_time4 = GPoint(115, 116);
+      ds->digital_colon = GPoint(89, 120);
 
       break;
     default:
@@ -462,83 +537,15 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
   return ds;
 }
 
-
-static int get_font(enum DialType dial_type) {
-  switch(dial_type) {
-    case FONT1:
-    case FONT1_ROUND:
-    case FONT1_DIGITAL:
-    case FONT1_ROUND_DIGITAL:
-      return 1;
-    case FONT2:
-    case FONT2_ROUND:
-    case FONT2_DIGITAL:
-    case FONT2_ROUND_DIGITAL:
-      return 2;
-    case FONT3:
-    case FONT3_ROUND:
-    case FONT3_DIGITAL:
-    case FONT3_ROUND_DIGITAL:
-      return 3;
-    default:
-      return -1;
-  }
-}
-
-static int get_font2() {
+static int get_font() {
   return settings.Font;
 }
 
-static bool is_digital(enum DialType dial_type) {
-  switch(dial_type) {
-    case FONT1:
-    case FONT1_ROUND:
-    case FONT2:
-    case FONT2_ROUND:
-    case FONT3:
-    case FONT3_ROUND:
-      return false;
-      break;
-    case FONT1_DIGITAL:
-    case FONT1_ROUND_DIGITAL:
-    case FONT2_DIGITAL:
-    case FONT2_ROUND_DIGITAL:
-    case FONT3_DIGITAL:
-    case FONT3_ROUND_DIGITAL:
-      return true;
-      break;
-    default:
-      return false;
-      break;
-  }
-}
-
-static bool is_digital2() {
+static bool is_digital() {
   return settings.DigitalWatch;
 }
 
-static bool is_round(enum DialType dial_type) {
-  switch(dial_type) {
-    case FONT1:
-    case FONT1_DIGITAL:
-    case FONT2:
-    case FONT2_DIGITAL:
-    case FONT3:
-    case FONT3_DIGITAL:
-      return false;
-    case FONT1_ROUND:
-    case FONT1_ROUND_DIGITAL:
-    case FONT2_ROUND:
-    case FONT2_ROUND_DIGITAL:
-    case FONT3_ROUND:
-    case FONT3_ROUND_DIGITAL:
-      return true;
-    default:
-      return false;
-  }
-}
-
-static bool is_round2() {
+static bool is_round() {
 #ifdef PBL_ROUND
   return true;
 #else
@@ -558,7 +565,7 @@ static void update_date() {
   binary_image_mask_data_draw(dial, digits, ds->date1, GRect(d1*ds->digit_size.w, 0, ds->digit_size.w, ds->digit_size.h));
   binary_image_mask_data_draw(dial, digits, ds->date2, GRect(d2*ds->digit_size.w, 0, ds->digit_size.w, ds->digit_size.h));
 
-  if (is_digital2()) {
+  if (is_digital()) {
     binary_image_mask_data_clear_region(dial, GRect(ds->day.x, ds->day.y, ds->day_size.w, ds->day_size.h));
     BinaryImageMaskData *day = binary_image_mask_data_create_from_resource(GSize(ds->day_size.w, ds->day_size.h * 7), ds->day_res);
     binary_image_mask_data_draw(dial, day, ds->day, GRect(0, current_day*ds->day_size.h, ds->day_size.w, ds->day_size.h));
@@ -575,7 +582,9 @@ static void update_digital_time(struct tm *tick_time) {
   binary_image_mask_data_clear_region(dial, GRect(ds->digital_time3.x, ds->digital_time3.y, ds->digit_big_size.w, ds->digit_big_size.h));
   binary_image_mask_data_clear_region(dial, GRect(ds->digital_time4.x, ds->digital_time4.y, ds->digit_big_size.w, ds->digit_big_size.h));
 
+#ifdef QUICKTEST
   int seconds = tick_time->tm_sec;
+#endif
   int minutes = prv_tick_time->tm_min;
   int hours = prv_tick_time->tm_hour; //TODO 12H format
 #ifdef HOUR
@@ -587,7 +596,9 @@ static void update_digital_time(struct tm *tick_time) {
 #endif
 
 #ifdef SECOND
+#ifdef QUICKTEST
   seconds = SECOND;
+#endif
 #endif
 
 #ifdef QUICKTEST
@@ -607,6 +618,19 @@ static void update_digital_time(struct tm *tick_time) {
   binary_image_mask_data_draw(dial, digits_big, ds->digital_time4, GRect(m2*ds->digit_big_size.w, 0, ds->digit_big_size.w, ds->digit_big_size.h));
 }
 
+static void unobstructed_change_handler(AnimationProgress progress, void *context) {
+  Layer *window_layer = window_get_root_layer(s_window);
+  GRect fullscreen = layer_get_frame(window_layer);
+  GRect obstructed = layer_get_unobstructed_bounds(window_layer);
+
+  int offset = (fullscreen.size.h - obstructed.size.h);
+  if (!is_digital()) {
+    offset = offset / 2;
+  }
+  fullscreen.origin.y = 0 - offset;
+  layer_set_frame(window_layer, fullscreen);
+}
+
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   time_t temp = time(NULL);
   prv_tick_time = localtime(&temp);
@@ -621,8 +645,17 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   if (settings.EnableDate) {
     int date = tick_time->tm_mday;
     if (current_date != date) {
+#ifdef DATE
+      current_date = DATE;
+#else
       current_date = date;
+#endif
+
+#ifdef DAY
+      current_day = DAY;
+#else
       current_day = tick_time->tm_wday;
+#endif
       update_date();
     }
   }
@@ -986,18 +1019,35 @@ static void draw_dial() {
 static void prv_window_load(Window *window) {
   time_t temp = time(NULL);
   prv_tick_time = localtime(&temp);
-  current_date = prv_tick_time->tm_mday;
+#ifdef DATE
+      current_date = DATE;
+#else
+      current_date = prv_tick_time->tm_mday;
+#endif
+
+#ifdef DAY
+  current_day = DAY;
+#else
   current_day = prv_tick_time->tm_wday;
+#endif
   Layer *window_layer = window_get_root_layer(window);
   bounds = layer_get_bounds(window_layer);
 
   draw_dial();
 
-  if (settings.EnableSecondsHand) {
+  if (settings.EnableSecondsHand && !settings.DigitalWatch) {
     tick_timer_service_subscribe(SECOND_UNIT, tick_handler);
   } else {
     tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
   }
+
+  unobstructed_change_handler(100, NULL);
+
+  UnobstructedAreaHandlers unobstructed_handlers = {
+    .change = unobstructed_change_handler
+  };
+
+  unobstructed_area_service_subscribe(unobstructed_handlers, NULL);
 
   s_bg_layer = layer_create(bounds);
   s_canvas_layer = layer_create(bounds);
