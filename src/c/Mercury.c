@@ -353,8 +353,8 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
         ds->date1 = GPoint(61, 118);
         ds->date2 = GPoint(73, 118);
       } else {
-        ds->date1 = GPoint(107, 105);
-        ds->date2 = GPoint(119, 105);
+        ds->date1 = GPoint(101, 105);
+        ds->date2 = GPoint(111, 105);
       }
 
       ds->digital_box = GPoint(24, 116);
@@ -382,13 +382,13 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
 
       ds->date_box = GPoint(73, 115);
       ds->date_single = GPoint(85, 119);
-      ds->day = GPoint(59, 94);
+      ds->day = GPoint(62, 94);
       if (!is_digital()) {
         ds->date1 = GPoint(79, 119);
         ds->date2 = GPoint(91, 119);
       } else {
-        ds->date1 = GPoint(99, 94);
-        ds->date2 = GPoint(111, 94);
+        ds->date1 = GPoint(98, 94);
+        ds->date2 = GPoint(106, 94);
       }
 
       ds->digital_box = GPoint(32, 105);
@@ -421,8 +421,8 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
         ds->date1 = GPoint(61, 120);
         ds->date2 = GPoint(73, 120);
       } else {
-        ds->date1 = GPoint(107, 109);
-        ds->date2 = GPoint(119, 109);
+        ds->date1 = GPoint(101, 109);
+        ds->date2 = GPoint(111, 109);
       }
 
       ds->digital_box = GPoint(28, 120);
@@ -450,13 +450,13 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
 
       ds->date_box = GPoint(75, 117);
       ds->date_single = GPoint(85, 121);
-      ds->day = GPoint(59, 98);
+      ds->day = GPoint(62, 98);
       if (!is_digital()) {
         ds->date1 = GPoint(79, 121);
         ds->date2 = GPoint(91, 121);
       } else {
-        ds->date1 = GPoint(99, 98);
-        ds->date2 = GPoint(111, 98);
+        ds->date1 = GPoint(98, 98);
+        ds->date2 = GPoint(106, 98);
       }
 
       ds->digital_box = GPoint(36, 109);
@@ -489,8 +489,8 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
         ds->date1 = GPoint(61, 120);
         ds->date2 = GPoint(73, 120);
       } else {
-        ds->date1 = GPoint(107, 110);
-        ds->date2 = GPoint(119, 110);
+        ds->date1 = GPoint(101, 110);
+        ds->date2 = GPoint(111, 110);
       }
 
       ds->digital_box = GPoint(28, 121);
@@ -518,13 +518,13 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
 
       ds->date_box = GPoint(75, 118);
       ds->date_single = GPoint(85, 121);
-      ds->day = GPoint(59, 99);
+      ds->day = GPoint(62, 99);
       if (!is_digital()) {
         ds->date1 = GPoint(79, 121);
         ds->date2 = GPoint(91, 121);
       } else {
-        ds->date1 = GPoint(99, 99);
-        ds->date2 = GPoint(111, 99);
+        ds->date1 = GPoint(98, 99);
+        ds->date2 = GPoint(106, 99);
       }
 
       ds->digital_box = GPoint(36, 110);
