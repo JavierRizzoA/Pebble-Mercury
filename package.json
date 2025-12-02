@@ -1,7 +1,7 @@
 {
   "name": "mercury",
   "author": "Javier Rizzo",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "keywords": [
     "pebble",
     "watchface",
@@ -162,6 +162,11 @@
           "type": "raw",
           "name": "DAYS",
           "file": "days.bin"
+        },
+        {
+          "type": "raw",
+          "name": "DIGITS_DIGITAL",
+          "file": "digits_digital.bin"
         }
       ]
     }

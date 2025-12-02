@@ -39,3 +39,13 @@ build "-DHOUR=22 -DMINUTE=6 -DSECOND=30 -DDAY=6 -DDATE=6 -DFONT=3 -DBGC1=GColorB
 screenshot diorite diorite4
 screenshot basalt basalt4
 screenshot chalk chalk4
+
+build "-DHOUR=22 -DMINUTE=6 -DSECOND=30 -DDAY=6 -DDATE=6 -DDIGITAL=true -DFONT=2"
+screenshot diorite diorite5
+screenshot basalt basalt5
+screenshot chalk chalk5
+
+build "-DHOUR=22 -DMINUTE=6 -DSECOND=30 -DDAY=6 -DDATE=6 -DDIGITAL=true -DFONT=3"
+screenshot diorite diorite6
+screenshot basalt basalt6
+screenshot chalk chalk6
