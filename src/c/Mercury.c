@@ -258,7 +258,7 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
 
   ds->logo_size = GSize(38, 12);
   ds->model_size = GSize(71, 5);
-  ds->day_size = GSize(36, 10);
+  ds->day_size = GSize(30, 10);
   ds->logo_res = RESOURCE_ID_LOGO;
   ds->models_res = RESOURCE_ID_MODELS;
   ds->day_res = RESOURCE_ID_DAYS;
@@ -325,6 +325,11 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
     return ds;
   }
 
+  if (is_digital()) {
+    ds->digit_res = RESOURCE_ID_DIGITS_DIGITAL;
+    ds->digit_size = GSize(8, 10);
+  }
+
   switch (dial_type) {
     case FONT1:
     case FONT1_DIGITAL:
@@ -343,13 +348,13 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
 
       ds->date_box = GPoint(55, 114);
       ds->date_single = GPoint(67, 118);
-      ds->day = GPoint(67, 105);
+      ds->day = GPoint(84, 105);
       if (!is_digital()) {
         ds->date1 = GPoint(61, 118);
         ds->date2 = GPoint(73, 118);
       } else {
-        ds->date1 = GPoint(107, 101);
-        ds->date2 = GPoint(119, 101);
+        ds->date1 = GPoint(118, 105);
+        ds->date2 = GPoint(128, 105);
       }
 
       ds->digital_box = GPoint(24, 116);
@@ -377,13 +382,13 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
 
       ds->date_box = GPoint(73, 115);
       ds->date_single = GPoint(85, 119);
-      ds->day = GPoint(59, 94);
+      ds->day = GPoint(64, 94);
       if (!is_digital()) {
         ds->date1 = GPoint(79, 119);
         ds->date2 = GPoint(91, 119);
       } else {
-        ds->date1 = GPoint(99, 90);
-        ds->date2 = GPoint(111, 90);
+        ds->date1 = GPoint(100, 94);
+        ds->date2 = GPoint(108, 94);
       }
 
       ds->digital_box = GPoint(32, 105);
@@ -411,13 +416,13 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
 
       ds->date_box = GPoint(57, 116);
       ds->date_single = GPoint(67, 118);
-      ds->day = GPoint(67, 109);
+      ds->day = GPoint(84, 109);
       if (!is_digital()) {
         ds->date1 = GPoint(61, 120);
         ds->date2 = GPoint(73, 120);
       } else {
-        ds->date1 = GPoint(107, 109);
-        ds->date2 = GPoint(119, 109);
+        ds->date1 = GPoint(118, 109);
+        ds->date2 = GPoint(128, 109);
       }
 
       ds->digital_box = GPoint(28, 120);
@@ -445,13 +450,13 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
 
       ds->date_box = GPoint(75, 117);
       ds->date_single = GPoint(85, 121);
-      ds->day = GPoint(59, 98);
+      ds->day = GPoint(64, 98);
       if (!is_digital()) {
         ds->date1 = GPoint(79, 121);
         ds->date2 = GPoint(91, 121);
       } else {
-        ds->date1 = GPoint(99, 98);
-        ds->date2 = GPoint(111, 98);
+        ds->date1 = GPoint(100, 98);
+        ds->date2 = GPoint(108, 98);
       }
 
       ds->digital_box = GPoint(36, 109);
@@ -479,13 +484,13 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
 
       ds->date_box = GPoint(57, 117);
       ds->date_single = GPoint(67, 120);
-      ds->day = GPoint(66, 110);
+      ds->day = GPoint(83, 110);
       if (!is_digital()) {
         ds->date1 = GPoint(61, 120);
         ds->date2 = GPoint(73, 120);
       } else {
-        ds->date1 = GPoint(107, 109);
-        ds->date2 = GPoint(119, 109);
+        ds->date1 = GPoint(118, 110);
+        ds->date2 = GPoint(128, 110);
       }
 
       ds->digital_box = GPoint(28, 121);
@@ -513,13 +518,13 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
 
       ds->date_box = GPoint(75, 118);
       ds->date_single = GPoint(85, 121);
-      ds->day = GPoint(59, 99);
+      ds->day = GPoint(64, 99);
       if (!is_digital()) {
         ds->date1 = GPoint(79, 121);
         ds->date2 = GPoint(91, 121);
       } else {
-        ds->date1 = GPoint(99, 98);
-        ds->date2 = GPoint(111, 98);
+        ds->date1 = GPoint(100, 99);
+        ds->date2 = GPoint(108, 99);
       }
 
       ds->digital_box = GPoint(36, 110);
@@ -945,6 +950,7 @@ static void draw_dial() {
 #endif
   binary_image_mask_data_destroy(dial);
   binary_image_mask_data_destroy(digits);
+  binary_image_mask_data_destroy(digits_big);
 
   free(ds);
   ds = get_dial_spec(get_dial_type());
@@ -1077,6 +1083,7 @@ static void prv_window_unload(Window *window) {
   layer_destroy(s_bg_layer);
   binary_image_mask_data_destroy(dial);
   binary_image_mask_data_destroy(digits);
+  binary_image_mask_data_destroy(digits_big);
   free(ds);
 }
 

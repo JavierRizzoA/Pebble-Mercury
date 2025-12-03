@@ -1,7 +1,5 @@
 # Pebble-Mercury
 
-![Banner](img/banner.png)
-
 A watchface for the Pebble Smartwatch.
 
 The background gradient follows the minutes hand.
@@ -19,6 +17,8 @@ This watchface was made for the
 | ![Aplite/Diorite/Flint](img/screenshots/diorite2.png) | ![Basalt](img/screenshots/basalt2.png) | ![Chalk](img/screenshots/chalk2.png)    |
 | ![Aplite/Diorite/Flint](img/screenshots/diorite3.png) | ![Basalt](img/screenshots/basalt3.png) | ![Chalk](img/screenshots/chalk3.png)    |
 | ![Aplite/Diorite/Flint](img/screenshots/diorite4.png) | ![Basalt](img/screenshots/basalt4.png) | ![Chalk](img/screenshots/chalk4.png)    |
+| ![Aplite/Diorite/Flint](img/screenshots/diorite5.png) | ![Basalt](img/screenshots/basalt5.png) | ![Chalk](img/screenshots/chalk5.png)    |
+| ![Aplite/Diorite/Flint](img/screenshots/diorite6.png) | ![Basalt](img/screenshots/basalt6.png) | ![Chalk](img/screenshots/chalk6.png)    |
 
 ## Installing
 

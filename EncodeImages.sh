@@ -19,3 +19,4 @@
 ./ImageEncoder/ImageEncoder.py --input img/resources/digital_colon2.png --output resources/digital_colon2.bin --invert
 ./ImageEncoder/ImageEncoder.py --input img/resources/digital_colon3.png --output resources/digital_colon3.bin --invert
 ./ImageEncoder/ImageEncoder.py --input img/resources/days.png --output resources/days.bin --invert
+./ImageEncoder/ImageEncoder.py --input img/resources/digits_digital.png --output resources/digits_digital.bin --invert
