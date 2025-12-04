@@ -859,18 +859,18 @@ static void bg_update_proc(Layer *layer, GContext *ctx) {
     GBitmapDataRowInfo info = gbitmap_get_data_row_info(fb, y);
 
     for(int x = 0; x < bounds.size.w; x++) {
+      int line_y = m * x + b;
+      int half_width = bounds.size.w / 2;
+
       GColor color = settings.BackgroundColor1;
       bool is_in_bg1 = true;
-      if (is_vertical && (minutes >= 59 || minutes <= 1) && x <= bounds.size.w / 2) {
+      if (!is_vertical && minutes < 30 && y <= line_y) {
         is_in_bg1 = false;
-      }
-      if (is_vertical && (minutes >= 29 && minutes <= 31) && x >= bounds.size.w / 2) {
+      } else if (!is_vertical && minutes >= 30 && y >= line_y) {
         is_in_bg1 = false;
-      }
-      if (!is_vertical && minutes < 30 && y <= m*x + b) {
+      } else if (is_vertical && (minutes >= 59 || minutes <= 1) && x <= half_width) {
         is_in_bg1 = false;
-      }
-      if (!is_vertical && minutes >= 30 && y >= m*x + b) {
+      } else if (is_vertical && (minutes >= 29 && minutes <= 31) && x >= half_width) {
         is_in_bg1 = false;
       }
 
