@@ -761,14 +761,14 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
 #endif
 
   if (!settings.DigitalWatch) {
-    int minutes_angle = ((double)minutes / 60 * 360) + ((double)seconds / 60 * 360 / 60) - 90;
+    int minutes_angle = ((float)minutes / 60 * 360) + ((float)seconds / 60 * 360 / 60) - 90;
 #ifdef PBL_COLOR
     draw_fancy_hand(ctx, minutes_angle, bounds.size.w / 2 - 10, settings.MinutesHandColor, settings.MinutesHandBorderColor);
 #else
     draw_fancy_hand(ctx, minutes_angle, bounds.size.w / 2 - 10, GColorWhite, GColorBlack);
 #endif
 
-    int hours_angle = ((double)hours / 12 * 360) + ((double)minutes / 60 * 360 / 12) + ((double)seconds / 60 * 360 / 60 / 12)  - 90;
+    int hours_angle = ((float)hours / 12 * 360) + ((float)minutes / 60 * 360 / 12) + ((float)seconds / 60 * 360 / 60 / 12)  - 90;
 
 #ifdef PBL_COLOR
     draw_fancy_hand(ctx, hours_angle, bounds.size.w / 2 - 30, settings.HoursHandColor, settings.HoursHandBorderColor);
@@ -777,7 +777,7 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
 #endif
 
     if (settings.EnableSecondsHand) {
-      int seconds_angle = ((double)seconds / 60 * 360) - 90;
+      int seconds_angle = ((float)seconds / 60 * 360) - 90;
 #ifdef PBL_COLOR
       draw_line_hand(ctx, seconds_angle, bounds.size.w / 2 - 5, 15, settings.SecondsHandColor);
 #else
@@ -843,7 +843,7 @@ static void bg_update_proc(Layer *layer, GContext *ctx) {
   seconds = 0;
 #endif
 
-  int angle = 360 - ((double)minutes / 60 * 360) - ((double)seconds / 60 * 360 / 60) + 90;
+  int angle = 360 - ((float)minutes / 60 * 360) - ((float)seconds / 60 * 360 / 60) + 90;
   GPoint origin = GPoint(bounds.size.w / 2, bounds.size.h / 2);
   GPoint p = polar_to_point_offset(origin, angle, bounds.size.h);
   bool is_vertical = false;
@@ -852,7 +852,7 @@ static void bg_update_proc(Layer *layer, GContext *ctx) {
     is_vertical = true;
   }
 
-  double m = (is_vertical) ? 0 : -slope_from_two_points(origin, p);
+  float m = (is_vertical) ? 0 : -slope_from_two_points(origin, p);
   int b = (origin.y - m * origin.x) + 0.5;
 
   for(int y = 0; y < bounds.size.h; y++) {
