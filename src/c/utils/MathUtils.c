@@ -34,8 +34,8 @@ GPoint add_points(GPoint a, GPoint b) {
 
 // Converts an angle and a distance to a cartesian point.
 GPoint polar_to_point(int angle, int distance) {
-  int x = distance * ((double)cos_lookup(DEG_TO_TRIGANGLE(angle)) / ((double)TRIG_MAX_ANGLE));
-  int y = distance * ((double)sin_lookup(DEG_TO_TRIGANGLE(angle)) / ((double)TRIG_MAX_ANGLE));
+  int x = distance * ((float)cos_lookup(DEG_TO_TRIGANGLE(angle)) / ((float)TRIG_MAX_ANGLE));
+  int y = distance * ((float)sin_lookup(DEG_TO_TRIGANGLE(angle)) / ((float)TRIG_MAX_ANGLE));
   return GPoint(x, y);
 }
 
@@ -43,6 +43,6 @@ GPoint polar_to_point_offset(GPoint offset, int angle, int distance) {
   return add_points(offset, polar_to_point(angle, distance));
 }
 
-double slope_from_two_points(GPoint a, GPoint b) {
-  return (double)(b.y - a.y) / (double)(b.x - a.x);
+float slope_from_two_points(GPoint a, GPoint b) {
+  return (float)(b.y - a.y) / (float)(b.x - a.x);
 }

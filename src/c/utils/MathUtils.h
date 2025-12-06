@@ -6,4 +6,4 @@ uint32_t isqrt(uint32_t n);
 GPoint polar_to_point(int angle, int distance);
 GPoint add_points(GPoint a, GPoint b);
 GPoint polar_to_point_offset(GPoint offset, int angle, int distance);
-double slope_from_two_points(GPoint a, GPoint b);
+float slope_from_two_points(GPoint a, GPoint b);

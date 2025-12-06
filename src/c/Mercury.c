@@ -65,6 +65,9 @@ static void prv_deinit(void);
 static int get_font();
 static bool is_digital();
 static bool is_round();
+static bool byte_get_bit(uint8_t *byte, uint8_t bit);
+static void byte_set_bit(uint8_t *byte, uint8_t bit, uint8_t value);
+static void set_pixel_color(GBitmapDataRowInfo info, GPoint point, GColor color);
 
 static void prv_save_settings(void) {
   persist_write_data(SETTINGS_KEY, &settings, sizeof(settings));
@@ -758,14 +761,14 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
 #endif
 
   if (!settings.DigitalWatch) {
-    int minutes_angle = ((double)minutes / 60 * 360) + ((double)seconds / 60 * 360 / 60) - 90;
+    int minutes_angle = ((float)minutes / 60 * 360) + ((float)seconds / 60 * 360 / 60) - 90;
 #ifdef PBL_COLOR
     draw_fancy_hand(ctx, minutes_angle, bounds.size.w / 2 - 10, settings.MinutesHandColor, settings.MinutesHandBorderColor);
 #else
     draw_fancy_hand(ctx, minutes_angle, bounds.size.w / 2 - 10, GColorWhite, GColorBlack);
 #endif
 
-    int hours_angle = ((double)hours / 12 * 360) + ((double)minutes / 60 * 360 / 12) + ((double)seconds / 60 * 360 / 60 / 12)  - 90;
+    int hours_angle = ((float)hours / 12 * 360) + ((float)minutes / 60 * 360 / 12) + ((float)seconds / 60 * 360 / 60 / 12)  - 90;
 
 #ifdef PBL_COLOR
     draw_fancy_hand(ctx, hours_angle, bounds.size.w / 2 - 30, settings.HoursHandColor, settings.HoursHandBorderColor);
@@ -774,7 +777,7 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
 #endif
 
     if (settings.EnableSecondsHand) {
-      int seconds_angle = ((double)seconds / 60 * 360) - 90;
+      int seconds_angle = ((float)seconds / 60 * 360) - 90;
 #ifdef PBL_COLOR
       draw_line_hand(ctx, seconds_angle, bounds.size.w / 2 - 5, 15, settings.SecondsHandColor);
 #else
@@ -790,10 +793,38 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
   }
 }
 
+static bool byte_get_bit(uint8_t *byte, uint8_t bit) {
+  return ((*byte) >> bit) & 1;
+}
+
+static void byte_set_bit(uint8_t *byte, uint8_t bit, uint8_t value) {
+  *byte ^= (-value ^ *byte) & (1 << bit);
+}
+
+static void set_pixel_color(GBitmapDataRowInfo info, GPoint point, GColor color) {
+#if defined(PBL_COLOR)
+  // Write the pixel's byte color
+  memset(&info.data[point.x], color.argb, 1);
+#elif defined(PBL_BW)
+  // Find the correct byte, then set the appropriate bit
+  uint8_t byte = point.x / 8;
+  uint8_t bit = point.x % 8;
+  byte_set_bit(&info.data[byte], bit, gcolor_equal(color, GColorWhite) ? 1 : 0);
+#endif
+}
+
 
 static void bg_update_proc(Layer *layer, GContext *ctx) {
+#ifdef LOG
+  time_t start_sec, end_sec;
+  uint16_t start_ms, end_ms;
+  time_ms(&start_sec, &start_ms);
+#endif
+
   int minutes = prv_tick_time->tm_min;
   int seconds = prv_tick_time->tm_sec;
+
+  GBitmap *fb = graphics_capture_frame_buffer(ctx);
 
 #ifdef MINUTE
   minutes = MINUTE;
@@ -812,7 +843,7 @@ static void bg_update_proc(Layer *layer, GContext *ctx) {
   seconds = 0;
 #endif
 
-  int angle = 360 - ((double)minutes / 60 * 360) - ((double)seconds / 60 * 360 / 60) + 90;
+  int angle = 360 - ((float)minutes / 60 * 360) - ((float)seconds / 60 * 360 / 60) + 90;
   GPoint origin = GPoint(bounds.size.w / 2, bounds.size.h / 2);
   GPoint p = polar_to_point_offset(origin, angle, bounds.size.h);
   bool is_vertical = false;
@@ -821,23 +852,25 @@ static void bg_update_proc(Layer *layer, GContext *ctx) {
     is_vertical = true;
   }
 
-  double m = (is_vertical) ? 0 : -slope_from_two_points(origin, p);
+  float m = (is_vertical) ? 0 : -slope_from_two_points(origin, p);
   int b = (origin.y - m * origin.x) + 0.5;
 
-  for(int x = 0; x < bounds.size.w; x++) {
-    for(int y = 0; y < bounds.size.h; y++) {
+  for(int y = 0; y < bounds.size.h; y++) {
+    GBitmapDataRowInfo info = gbitmap_get_data_row_info(fb, y);
+
+    for(int x = 0; x < bounds.size.w; x++) {
+      int line_y = m * x + b;
+      int half_width = bounds.size.w / 2;
+
       GColor color = settings.BackgroundColor1;
       bool is_in_bg1 = true;
-      if (is_vertical && (minutes >= 59 || minutes <= 1) && x <= bounds.size.w / 2) {
+      if (!is_vertical && minutes < 30 && y <= line_y) {
         is_in_bg1 = false;
-      }
-      if (is_vertical && (minutes >= 29 && minutes <= 31) && x >= bounds.size.w / 2) {
+      } else if (!is_vertical && minutes >= 30 && y >= line_y) {
         is_in_bg1 = false;
-      }
-      if (!is_vertical && minutes < 30 && y <= m*x + b) {
+      } else if (is_vertical && (minutes >= 59 || minutes <= 1) && x <= half_width) {
         is_in_bg1 = false;
-      }
-      if (!is_vertical && minutes >= 30 && y >= m*x + b) {
+      } else if (is_vertical && (minutes >= 29 && minutes <= 31) && x >= half_width) {
         is_in_bg1 = false;
       }
 
@@ -877,10 +910,16 @@ static void bg_update_proc(Layer *layer, GContext *ctx) {
 #endif
       }
 
-      graphics_context_set_stroke_color(ctx, color);
-      graphics_draw_pixel(ctx, GPoint(x, y));
+      set_pixel_color(info, GPoint(x, y), color);
     }
   }
+  graphics_release_frame_buffer(ctx, fb);
+
+#ifdef LOG
+  time_ms(&end_sec, &end_ms);
+  int elapsed_ms = (int)((end_sec - start_sec) * 1000 + (end_ms - start_ms));
+  APP_LOG(APP_LOG_LEVEL_INFO, "Time to update BG: %d ms", elapsed_ms);
+#endif
 }
 
 static enum DialType get_dial_type() {
@@ -957,7 +996,6 @@ static void draw_dial() {
 
   dial = binary_image_mask_data_create(bounds.size);
   digits = binary_image_mask_data_create_from_resource(GSize(ds->digit_size.w * 10, ds->digit_size.h), ds->digit_res);
-  digits_big = binary_image_mask_data_create_from_resource(GSize(ds->digit_big_size.w * 10, ds->digit_big_size.h), ds->digit_big_res);
 
   if (!settings.DigitalWatch) {
     BinaryImageMaskData *markers = binary_image_mask_data_create_from_resource(GSize(ds->marker_size.w, ds->marker_size.h * 12), ds->marker_res);
@@ -965,6 +1003,9 @@ static void draw_dial() {
       binary_image_mask_data_draw(dial, markers, ds->markers[i], GRect(0, ds->marker_size.h * i, ds->marker_size.w, ds->marker_size.h));
     }
     binary_image_mask_data_destroy(markers);
+  }
+  else {
+    digits_big = binary_image_mask_data_create_from_resource(GSize(ds->digit_big_size.w * 10, ds->digit_big_size.h), ds->digit_big_res);
   }
 
 
@@ -1034,6 +1075,8 @@ static void draw_dial() {
     BinaryImageMaskData *digital_colon = binary_image_mask_data_create_from_resource(ds->digital_colon_size, ds->digital_colon_res);
     binary_image_mask_data_draw(dial, digital_colon, ds->digital_colon, GRect(0, 0, ds->digital_colon_size.w, ds->digital_colon_size.h));
     binary_image_mask_data_destroy(digital_colon);
+
+    update_digital_time(prv_tick_time);
   }
 }
 
