@@ -63,6 +63,8 @@ typedef struct ClaySettings {
   bool EnableWatchModel;
   bool DigitalWatch;
   int Font;
+  bool FixedAngle;
+  int Angle;
   GColor BackgroundColor1;
   GColor BackgroundColor2;
   GColor TextColor1;

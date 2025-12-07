@@ -153,6 +153,8 @@ static void prv_default_settings(void) {
 #else
   settings.Font = 1;
 #endif
+  settings.FixedAngle = false;
+  settings.Angle = 40;
 }
 
 static void prv_load_settings(void) {
@@ -184,6 +186,8 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
   Tuple *bwtext_color1_t = dict_find(iter, MESSAGE_KEY_BWTextColor1);
   Tuple *bwtext_color2_t = dict_find(iter, MESSAGE_KEY_BWTextColor2);
   Tuple *font_t = dict_find(iter, MESSAGE_KEY_Font);
+  Tuple *fixed_angle_t = dict_find(iter, MESSAGE_KEY_FixedAngle);
+  Tuple *angle_t = dict_find(iter, MESSAGE_KEY_Angle);
 
   if(enable_seconds_t) {
     settings.EnableSecondsHand = enable_seconds_t->value->int32 == 1;
@@ -247,6 +251,12 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
   }
   if (font_t) {
     settings.Font = font_t->value->int32;
+  }
+  if (fixed_angle_t) {
+    settings.FixedAngle = fixed_angle_t->value->int32 == 1;
+  }
+  if (angle_t) {
+    settings.Angle = angle_t->value->int32;
   }
 
   prv_save_settings();
@@ -843,7 +853,11 @@ static void bg_update_proc(Layer *layer, GContext *ctx) {
   seconds = 0;
 #endif
 
-  int angle = 360 - ((float)minutes / 60 * 360) - ((float)seconds / 60 * 360 / 60) + 90;
+  int angle = 360 -settings.Angle + 90;
+  if (!settings.FixedAngle) {
+    angle = 360 - ((float)minutes / 60 * 360) - ((float)seconds / 60 * 360 / 60) + 90;
+  }
+
   GPoint origin = GPoint(bounds.size.w / 2, bounds.size.h / 2);
   GPoint p = polar_to_point_offset(origin, angle, bounds.size.h);
   bool is_vertical = false;

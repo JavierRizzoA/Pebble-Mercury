@@ -66,6 +66,30 @@ module.exports = [
   },
   {
     "type": "section",
+    "items": [
+      {
+        "type": "heading",
+        "defaultValue": "Fixed Angle"
+      },
+      {
+        "type": "toggle",
+        "label": "Fixed Angle",
+        "messageKey": "FixedAngle",
+        "defaultValue": false
+      },
+      {
+        "type": "slider",
+        "label": "Angle",
+        "messageKey": "Angle",
+        "defaultValue": 40,
+        "min": 0,
+        "max": 359,
+        "step": 1
+      }
+    ]
+  },
+  {
+    "type": "section",
     "capabilities": [ "COLOR" ],
     "items": [
       {

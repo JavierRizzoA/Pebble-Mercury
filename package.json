@@ -1,7 +1,7 @@
 {
   "name": "mercury",
   "author": "Javier Rizzo",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "keywords": [
     "pebble",
     "watchface",
@@ -54,7 +54,9 @@
       "BWBackgroundColor2",
       "BWTextColor1",
       "BWTextColor2",
-      "Font"
+      "Font",
+      "FixedAngle",
+      "Angle"
     ],
     "resources": {
       "media": [
