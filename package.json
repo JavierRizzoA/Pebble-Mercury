@@ -169,6 +169,11 @@
           "type": "raw",
           "name": "DIGITS_DIGITAL",
           "file": "digits_digital.bin"
+        },
+        {
+          "type": "raw",
+          "name": "MOONPHASES",
+          "file": "moonphases.bin"
         }
       ]
     }

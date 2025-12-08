@@ -51,6 +51,7 @@ static void prv_default_settings(void);
 static void prv_load_settings(void);
 static void prv_inbox_received_handler(DictionaryIterator *iter, void *context);
 static void update_date();
+static void update_moonphase();
 static void update_digital_time(struct tm *tick_time);
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed);
 static void draw_fancy_hand(GContext *ctx, int angle, int length, GColor fill_color, GColor border_color);
@@ -273,9 +274,13 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
   ds->logo_size = GSize(38, 12);
   ds->model_size = GSize(71, 5);
   ds->day_size = GSize(30, 10);
+  ds->moonphase_size = GSize(10, 10);
   ds->logo_res = RESOURCE_ID_LOGO;
   ds->models_res = RESOURCE_ID_MODELS;
   ds->day_res = RESOURCE_ID_DAYS;
+  ds->moonphase_res = RESOURCE_ID_MOONPHASES;
+
+  ds->moonphase = GPoint(67, 52);
 
   if (!is_round()) {
     ds->logo = GPoint(53, 27);
@@ -592,6 +597,14 @@ static void update_date() {
   }
 }
 
+static void update_moonphase() {
+  BinaryImageMaskData *moonphases = binary_image_mask_data_create_from_resource(GSize(ds->moonphase_size.w, ds->moonphase_size.h * 20), ds->moonphase_res);
+  binary_image_mask_data_clear_region(dial, GRect(ds->moonphase.x, ds->moonphase.y, ds->moonphase_size.w, ds->moonphase_size.h));
+  int phase = prv_tick_time->tm_sec % 20;
+  binary_image_mask_data_draw(dial, moonphases, ds->moonphase, GRect(0, phase*ds->moonphase_size.h, ds->moonphase_size.w, ds->moonphase_size.h));
+  binary_image_mask_data_destroy(moonphases);
+}
+
 static void update_digital_time(struct tm *tick_time) {
 #ifdef LOG
   APP_LOG(APP_LOG_LEVEL_INFO, "Updating Digital Time");
@@ -691,6 +704,7 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   if (settings.DigitalWatch) {
     update_digital_time(tick_time);
   }
+  update_moonphase();
 
   layer_mark_dirty(s_canvas_layer);
   layer_mark_dirty(s_bg_layer);
