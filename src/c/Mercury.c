@@ -872,7 +872,7 @@ static void bg_update_proc(Layer *layer, GContext *ctx) {
   for(int y = 0; y < bounds.size.h; y++) {
     GBitmapDataRowInfo info = gbitmap_get_data_row_info(fb, y);
 
-    for(int x = 0; x < bounds.size.w; x++) {
+    for(int x = info.min_x; x <= info.max_x; x++) {
       int line_y = m * x + b;
       int half_width = bounds.size.w / 2;
 
