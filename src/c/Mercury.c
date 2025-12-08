@@ -346,18 +346,18 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
   switch (dial_type) {
     case FONT1:
     case FONT1_DIGITAL:
-      ds->markers[0] = GPoint(61, 1);
-      ds->markers[1] = GPoint(105, 1);
-      ds->markers[2] = GPoint(121, 39);
-      ds->markers[3] = GPoint(121, 74);
-      ds->markers[4] = GPoint(121, 110);
+      ds->markers[0] = GPoint(61, 2);
+      ds->markers[1] = GPoint(105, 2);
+      ds->markers[2] = GPoint(120, 39);
+      ds->markers[3] = GPoint(120, 74);
+      ds->markers[4] = GPoint(120, 110);
       ds->markers[5] = GPoint(105, 147);
       ds->markers[6] = GPoint(61, 147);
       ds->markers[7] = GPoint(17, 147);
-      ds->markers[8] = GPoint(1, 110);
-      ds->markers[9] = GPoint(1, 74);
-      ds->markers[10] = GPoint(1, 39);
-      ds->markers[11] = GPoint(17, 1);
+      ds->markers[8] = GPoint(2, 110);
+      ds->markers[9] = GPoint(2, 74);
+      ds->markers[10] = GPoint(2, 39);
+      ds->markers[11] = GPoint(17, 2);
 
       ds->date_box = GPoint(55, 114);
       ds->date_single = GPoint(67, 118);
@@ -414,18 +414,18 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
       break;
     case FONT2:
     case FONT2_DIGITAL:
-      ds->markers[0] = GPoint(61, 1);
-      ds->markers[1] = GPoint(105, 1);
-      ds->markers[2] = GPoint(121, 41);
-      ds->markers[3] = GPoint(121, 76);
-      ds->markers[4] = GPoint(121, 112);
+      ds->markers[0] = GPoint(61, 2);
+      ds->markers[1] = GPoint(105, 2);
+      ds->markers[2] = GPoint(120, 41);
+      ds->markers[3] = GPoint(120, 76);
+      ds->markers[4] = GPoint(120, 112);
       ds->markers[5] = GPoint(105, 151);
       ds->markers[6] = GPoint(61, 151);
       ds->markers[7] = GPoint(17, 151);
-      ds->markers[8] = GPoint(1, 112);
-      ds->markers[9] = GPoint(1, 76);
-      ds->markers[10] = GPoint(1, 41);
-      ds->markers[11] = GPoint(17, 1);
+      ds->markers[8] = GPoint(2, 112);
+      ds->markers[9] = GPoint(2, 76);
+      ds->markers[10] = GPoint(2, 41);
+      ds->markers[11] = GPoint(17, 2);
 
       ds->date_box = GPoint(57, 116);
       ds->date_single = GPoint(67, 118);
@@ -482,18 +482,18 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
       break;
     case FONT3:
     case FONT3_DIGITAL:
-      ds->markers[0] = GPoint(61, 1);
-      ds->markers[1] = GPoint(105, 1);
-      ds->markers[2] = GPoint(121, 41);
-      ds->markers[3] = GPoint(121, 76);
-      ds->markers[4] = GPoint(121, 112);
-      ds->markers[5] = GPoint(105, 151);
-      ds->markers[6] = GPoint(61, 151);
-      ds->markers[7] = GPoint(17, 151);
-      ds->markers[8] = GPoint(1, 112);
-      ds->markers[9] = GPoint(1, 76);
-      ds->markers[10] = GPoint(1, 41);
-      ds->markers[11] = GPoint(17, 1);
+      ds->markers[0] = GPoint(61, 2);
+      ds->markers[1] = GPoint(105, 2);
+      ds->markers[2] = GPoint(120, 41);
+      ds->markers[3] = GPoint(120, 76);
+      ds->markers[4] = GPoint(120, 112);
+      ds->markers[5] = GPoint(105, 150);
+      ds->markers[6] = GPoint(61, 150);
+      ds->markers[7] = GPoint(17, 150);
+      ds->markers[8] = GPoint(2, 112);
+      ds->markers[9] = GPoint(2, 76);
+      ds->markers[10] = GPoint(2, 41);
+      ds->markers[11] = GPoint(17, 2);
 
       ds->date_box = GPoint(57, 117);
       ds->date_single = GPoint(67, 120);

@@ -12,12 +12,13 @@ function screenshot() {
     pebble emu-set-timeline-quick-view --emulator "$1" on
   fi
 
+  #sleep 2
+
   pebble screenshot --emulator "$1" ./img/screenshots/"$2".png
+
   if [[ "$3" == "true" ]]; then
     pebble emu-set-timeline-quick-view --emulator "$1" off
   fi
-
-  sleep 2
 
   pebble kill
 }
