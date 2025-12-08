@@ -14,9 +14,17 @@ app = Flask(__name__)
 def get_moon_phase():
     lat = request.args.get('latitude')
     lon = request.args.get('longitude')
+    date = request.args.get('date')
 
     observer = ephem.Observer()
-    observer.date = datetime.utcnow()
+
+    if date:
+        try:
+            observer.date = date
+        except ValueError:
+            return jsonify({'Error': 'Invalid date.'}), 400
+    else:
+        observer.date = datetime.utcnow()
 
     if lat and lon:
         try:
