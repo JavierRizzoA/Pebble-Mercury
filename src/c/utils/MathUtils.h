@@ -9,3 +9,4 @@ GPoint polar_to_point_offset(GPoint offset, int angle, int distance);
 float slope_from_two_points(GPoint a, GPoint b);
 int min(int a, int b);
 int max(int a, int b);
+double fmod(double a, double b);

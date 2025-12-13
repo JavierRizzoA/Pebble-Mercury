@@ -64,6 +64,7 @@ typedef struct ClaySettings {
   bool EnableDate;
   bool EnablePebbleLogo;
   bool EnableWatchModel;
+  bool EnableMoonphase;
   bool DigitalWatch;
   int Font;
   bool FixedAngle;
