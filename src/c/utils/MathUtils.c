@@ -46,3 +46,19 @@ GPoint polar_to_point_offset(GPoint offset, int angle, int distance) {
 float slope_from_two_points(GPoint a, GPoint b) {
   return (float)(b.y - a.y) / (float)(b.x - a.x);
 }
+
+int min(int a, int b) {
+  if (a < b) {
+    return a;
+  } else {
+    return b;
+  }
+}
+
+int max(int a, int b) {
+  if (a > b) {
+    return a;
+  } else {
+    return b;
+  }
+}
