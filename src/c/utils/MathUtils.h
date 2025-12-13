@@ -7,3 +7,5 @@ GPoint polar_to_point(int angle, int distance);
 GPoint add_points(GPoint a, GPoint b);
 GPoint polar_to_point_offset(GPoint offset, int angle, int distance);
 float slope_from_two_points(GPoint a, GPoint b);
+int min(int a, int b);
+int max(int a, int b);

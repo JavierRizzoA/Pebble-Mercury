@@ -17,6 +17,7 @@ static int current_date = -1;
 static int current_day = -1;
 static ClaySettings settings;
 static DialSpec *ds;
+static int offset_y = 0;
 
 //#define LOG
 //#define LOGTIME
@@ -653,6 +654,7 @@ static void unobstructed_change_handler(AnimationProgress progress, void *contex
   if (!is_digital()) {
     offset = offset / 2;
   }
+  offset_y = -offset;
   fullscreen.origin.y = 0 - offset;
   layer_set_frame(window_layer, fullscreen);
 }
@@ -867,9 +869,9 @@ static void bg_update_proc(Layer *layer, GContext *ctx) {
   }
 
   float m = (is_vertical) ? 0 : -slope_from_two_points(origin, p);
-  int b = (origin.y - m * origin.x) + 0.5;
+  int b = (origin.y + offset_y - m * origin.x) + 0.5;
 
-  for(int y = 0; y < bounds.size.h; y++) {
+  for(int y = max(0, offset_y); y < bounds.size.h + offset_y; y++) {
     GBitmapDataRowInfo info = gbitmap_get_data_row_info(fb, y);
 
     for(int x = info.min_x; x <= info.max_x; x++) {
@@ -888,7 +890,7 @@ static void bg_update_proc(Layer *layer, GContext *ctx) {
         is_in_bg1 = false;
       }
 
-      bool is_in_dial = binary_image_mask_data_get_pixel(dial, x, y);
+      bool is_in_dial = binary_image_mask_data_get_pixel(dial, x, y - offset_y);
 
       if (is_in_bg1 && is_in_dial) {
 #ifdef PBL_COLOR
@@ -1119,6 +1121,13 @@ static void prv_window_load(Window *window) {
     tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
   }
 
+  s_bg_layer = layer_create(bounds);
+  s_canvas_layer = layer_create(bounds);
+  layer_add_child(window_layer, s_bg_layer);
+  layer_add_child(window_layer, s_canvas_layer);
+  layer_set_update_proc(s_canvas_layer, canvas_update_proc);
+  layer_set_update_proc(s_bg_layer, bg_update_proc);
+
   unobstructed_change_handler(100, NULL);
 
   UnobstructedAreaHandlers unobstructed_handlers = {
@@ -1126,13 +1135,6 @@ static void prv_window_load(Window *window) {
   };
 
   unobstructed_area_service_subscribe(unobstructed_handlers, NULL);
-
-  s_bg_layer = layer_create(bounds);
-  s_canvas_layer = layer_create(bounds);
-  layer_add_child(window_layer, s_bg_layer);
-  layer_add_child(window_layer, s_canvas_layer);
-  layer_set_update_proc(s_canvas_layer, canvas_update_proc);
-  layer_set_update_proc(s_bg_layer, bg_update_proc);
 }
 
 static void prv_window_unload(Window *window) {
