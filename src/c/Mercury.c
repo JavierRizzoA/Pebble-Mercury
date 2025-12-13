@@ -714,7 +714,7 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   APP_LOG(APP_LOG_LEVEL_INFO, "Time: %d:%d:%d", hours, minutes, seconds);
 #endif
 
-  if (settings.EnableDate) {
+  if (settings.EnableDate || settings.EnableMoonphase) {
     int date = tick_time->tm_mday;
     if (current_date != date) {
 #ifdef DATE
@@ -728,16 +728,18 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 #else
       current_day = tick_time->tm_wday;
 #endif
-      update_date();
+      if (settings.EnableDate) {
+        update_date();
+      }
+
+      if (settings.EnableMoonphase) {
+        update_moonphase();
+      }
     }
   }
 
   if (settings.DigitalWatch) {
     update_digital_time(tick_time);
-  }
-
-  if (settings.EnableMoonphase) {
-    update_moonphase();
   }
 
   layer_mark_dirty(s_canvas_layer);
@@ -1129,6 +1131,10 @@ static void draw_dial() {
 
   if (settings.EnableDate) {
     update_date();
+  }
+
+  if (settings.EnableMoonphase) {
+    update_moonphase();
   }
 
   if (settings.DigitalWatch) {
