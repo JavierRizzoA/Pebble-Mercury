@@ -44,21 +44,6 @@ typedef struct DialSpec {
   uint32_t moonphase_res;
 } __attribute__((__packed__)) DialSpec;
 
-enum DialType {
-  FONT1,
-  FONT2,
-  FONT3,
-  FONT1_ROUND,
-  FONT2_ROUND,
-  FONT3_ROUND,
-  FONT1_DIGITAL,
-  FONT2_DIGITAL,
-  FONT3_DIGITAL,
-  FONT1_ROUND_DIGITAL,
-  FONT2_ROUND_DIGITAL,
-  FONT3_ROUND_DIGITAL
-};
-
 typedef struct ClaySettings {
   bool EnableSecondsHand;
   bool EnableDate;
