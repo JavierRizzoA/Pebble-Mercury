@@ -40,6 +40,12 @@ module.exports = [
       },
       {
         "type": "toggle",
+        "label": "Moonphase",
+        "messageKey": "EnableMoonphase",
+        "defaultValue": true
+      },
+      {
+        "type": "toggle",
         "label": "Digital watch",
         "messageKey": "DigitalWatch",
         "defaultValue": false

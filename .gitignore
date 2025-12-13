@@ -3,3 +3,4 @@ build/
 node_modules/
 resources/*.bin
 *:Zone.Identifier
+.venv/

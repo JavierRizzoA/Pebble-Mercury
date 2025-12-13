@@ -45,12 +45,13 @@ static int offset_y = 0;
 //#define BWTC1 GColorBlack
 //#define BWTC2 GColorWhite
 
-
 static void prv_save_settings(void);
 static void prv_default_settings(void);
 static void prv_load_settings(void);
 static void prv_inbox_received_handler(DictionaryIterator *iter, void *context);
 static void update_date();
+static void update_moonphase();
+static int get_moonphase_index();
 static void update_digital_time(struct tm *tick_time);
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed);
 static void draw_fancy_hand(GContext *ctx, int angle, int length, GColor fill_color, GColor border_color);
@@ -79,6 +80,7 @@ static void prv_default_settings(void) {
   settings.EnableDate = true;
   settings.EnablePebbleLogo = true;
   settings.EnableWatchModel = true;
+  settings.EnableMoonphase = true;
 #ifdef DIGITAL
   settings.DigitalWatch = DIGITAL;
 #else
@@ -172,6 +174,7 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
   Tuple *enable_date_t = dict_find(iter, MESSAGE_KEY_EnableDate);
   Tuple *enable_pebble_logo_t = dict_find(iter, MESSAGE_KEY_EnablePebbleLogo);
   Tuple *enable_watch_model_t = dict_find(iter, MESSAGE_KEY_EnableWatchModel);
+  Tuple *enable_moonphase_t = dict_find(iter, MESSAGE_KEY_EnableMoonphase);
   Tuple *digital_watch_t = dict_find(iter, MESSAGE_KEY_DigitalWatch);
   Tuple *bg_color1_t = dict_find(iter, MESSAGE_KEY_BackgroundColor1);
   Tuple *bg_color2_t = dict_find(iter, MESSAGE_KEY_BackgroundColor2);
@@ -207,6 +210,9 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
   }
   if(enable_watch_model_t) {
     settings.EnableWatchModel = enable_watch_model_t->value->int32 == 1;
+  }
+  if(enable_moonphase_t) {
+    settings.EnableMoonphase = enable_moonphase_t->value->int32 == 1;
   }
   if(digital_watch_t) {
     settings.DigitalWatch = digital_watch_t->value->int32 == 1;
@@ -273,17 +279,22 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
   ds->logo_size = GSize(38, 12);
   ds->model_size = GSize(71, 5);
   ds->day_size = GSize(30, 10);
+  ds->moonphase_size = GSize(10, 10);
   ds->logo_res = RESOURCE_ID_LOGO;
   ds->models_res = RESOURCE_ID_MODELS;
   ds->day_res = RESOURCE_ID_DAYS;
+  ds->moonphase_res = RESOURCE_ID_MOONPHASES;
+
 
   if (!is_round()) {
     ds->logo = GPoint(53, 27);
     ds->model = GPoint(36, 40);
+    ds->moonphase = GPoint(67, 53);
   }
   else {
     ds->logo = GPoint(71, 39);
     ds->model = GPoint(54, 52);
+    ds->moonphase = GPoint(85, 65);
   }
 
   if (get_font() == 1) {
@@ -592,6 +603,40 @@ static void update_date() {
   }
 }
 
+static int get_moonphase_index() {
+  const double synodic_month = 29.53;
+  struct tm ref = {0};
+  ref.tm_year = 2000 - 1900;
+  ref.tm_mon = 0;
+  ref.tm_mday = 6;
+  time_t ref_time = mktime(&ref);
+
+  time_t target_time = mktime(prv_tick_time);
+  double days_since_ref = difftime(target_time, ref_time) / (60.0 * 60.0 * 24.0);
+
+  double moon_age = fmod(days_since_ref, synodic_month);
+  if (moon_age < 0) moon_age += synodic_month;
+
+  double phase_fraction = moon_age / synodic_month;
+
+  int index = (int)(phase_fraction * 20.0);
+  if (index > 19) index = 19;
+
+  return index;
+}
+
+static void update_moonphase() {
+  BinaryImageMaskData *moonphases = binary_image_mask_data_create_from_resource(GSize(ds->moonphase_size.w, ds->moonphase_size.h * 20), ds->moonphase_res);
+  binary_image_mask_data_clear_region(dial, GRect(ds->moonphase.x, ds->moonphase.y, ds->moonphase_size.w, ds->moonphase_size.h));
+#ifdef MOONPHASE
+  int phase = MOONPHASE;
+#else
+  int phase = get_moonphase_index();
+#endif
+  binary_image_mask_data_draw(dial, moonphases, ds->moonphase, GRect(0, phase*ds->moonphase_size.h, ds->moonphase_size.w, ds->moonphase_size.h));
+  binary_image_mask_data_destroy(moonphases);
+}
+
 static void update_digital_time(struct tm *tick_time) {
 #ifdef LOG
   APP_LOG(APP_LOG_LEVEL_INFO, "Updating Digital Time");
@@ -670,7 +715,7 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   APP_LOG(APP_LOG_LEVEL_INFO, "Time: %d:%d:%d", hours, minutes, seconds);
 #endif
 
-  if (settings.EnableDate) {
+  if (settings.EnableDate || settings.EnableMoonphase) {
     int date = tick_time->tm_mday;
     if (current_date != date) {
 #ifdef DATE
@@ -684,7 +729,13 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 #else
       current_day = tick_time->tm_wday;
 #endif
-      update_date();
+      if (settings.EnableDate) {
+        update_date();
+      }
+
+      if (settings.EnableMoonphase) {
+        update_moonphase();
+      }
     }
   }
 
@@ -1081,6 +1132,10 @@ static void draw_dial() {
 
   if (settings.EnableDate) {
     update_date();
+  }
+
+  if (settings.EnableMoonphase) {
+    update_moonphase();
   }
 
   if (settings.DigitalWatch) {

@@ -62,3 +62,10 @@ int max(int a, int b) {
     return b;
   }
 }
+
+double fmod(double a, double b) {
+    int quotient = (int)(a / b);
+    double result = a - (quotient * b);
+    if (result < 0) result += b;
+    return result;
+}

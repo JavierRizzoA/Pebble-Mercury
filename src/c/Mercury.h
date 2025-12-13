@@ -19,6 +19,7 @@ typedef struct DialSpec {
   GPoint digital_time4;
   GPoint digital_colon;
   GPoint day;
+  GPoint moonphase;
 
   GSize marker_size;
   GSize digit_size;
@@ -29,6 +30,7 @@ typedef struct DialSpec {
   GSize digital_box_size;
   GSize digital_colon_size;
   GSize day_size;
+  GSize moonphase_size;
 
   uint32_t marker_res;
   uint32_t digit_res;
@@ -39,6 +41,7 @@ typedef struct DialSpec {
   uint32_t digital_colon_res;
   uint32_t digit_big_res;
   uint32_t day_res;
+  uint32_t moonphase_res;
 } __attribute__((__packed__)) DialSpec;
 
 enum DialType {
@@ -61,6 +64,7 @@ typedef struct ClaySettings {
   bool EnableDate;
   bool EnablePebbleLogo;
   bool EnableWatchModel;
+  bool EnableMoonphase;
   bool DigitalWatch;
   int Font;
   bool FixedAngle;

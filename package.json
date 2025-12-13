@@ -1,7 +1,7 @@
 {
   "name": "mercury",
   "author": "Javier Rizzo",
-  "version": "1.10.0",
+  "version": "1.11.0",
   "keywords": [
     "pebble",
     "watchface",
@@ -12,7 +12,10 @@
     "colorful",
     "geometric",
     "analog",
-    "digital"
+    "digital",
+    "moon",
+    "phase",
+    "moonphase"
   ],
   "private": true,
   "dependencies": {
@@ -40,6 +43,7 @@
       "EnableDate",
       "EnablePebbleLogo",
       "EnableWatchModel",
+      "EnableMoonphase",
       "DigitalWatch",
       "BackgroundColor1",
       "BackgroundColor2",
@@ -169,6 +173,11 @@
           "type": "raw",
           "name": "DIGITS_DIGITAL",
           "file": "digits_digital.bin"
+        },
+        {
+          "type": "raw",
+          "name": "MOONPHASES",
+          "file": "moonphases.bin"
         }
       ]
     }
