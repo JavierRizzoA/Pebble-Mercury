@@ -12,7 +12,10 @@
     "colorful",
     "geometric",
     "analog",
-    "digital"
+    "digital",
+    "moon",
+    "phase",
+    "moonphase"
   ],
   "private": true,
   "dependencies": {
