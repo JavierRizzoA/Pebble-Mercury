@@ -285,15 +285,16 @@ DialSpec* get_dial_spec(enum DialType dial_type) {
   ds->day_res = RESOURCE_ID_DAYS;
   ds->moonphase_res = RESOURCE_ID_MOONPHASES;
 
-  ds->moonphase = GPoint(67, 52);
 
   if (!is_round()) {
     ds->logo = GPoint(53, 27);
     ds->model = GPoint(36, 40);
+    ds->moonphase = GPoint(67, 53);
   }
   else {
     ds->logo = GPoint(71, 39);
     ds->model = GPoint(54, 52);
+    ds->moonphase = GPoint(85, 65);
   }
 
   if (get_font() == 1) {
