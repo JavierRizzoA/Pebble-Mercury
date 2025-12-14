@@ -67,9 +67,11 @@ static void prv_deinit(void);
 static int get_font();
 static bool is_digital();
 static bool is_round();
+static bool is_large_screen();
 static bool byte_get_bit(uint8_t *byte, uint8_t bit);
 static void byte_set_bit(uint8_t *byte, uint8_t bit, uint8_t value);
 static void set_pixel_color(GBitmapDataRowInfo info, GPoint point, GColor color);
+static void set_marker_positions(DialSpec* ds);
 
 static void prv_save_settings(void) {
   persist_write_data(SETTINGS_KEY, &settings, sizeof(settings));
@@ -271,33 +273,73 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
   layer_mark_dirty(s_bg_layer);
 }
 
+static void set_marker_positions(DialSpec* ds) {
+  int margin = 2;
+  if (is_large_screen()) {
+    margin = 8;
+  } else if (is_round()) {
+    margin = 4;
+  }
+  int half_digit_width = ds->marker_size.w / 2;
+  int half_digit_height = ds->marker_size.h / 2;
+  int half_screen_width = bounds.size.w / 2 - margin - half_digit_width;
+  int half_screen_height = bounds.size.h / 2 - margin - half_digit_height;
 
+  for (int i = 0; i < 12; i++) {
+    int x = -1;
+    int y = -1;
+
+    int angle = abs(90 - ((i * 360 / 12) % 180));
+
+    if (is_round()) {
+      x = half_screen_width * cosine(angle);
+      y = half_screen_height * sine(angle);
+    }
+    else {
+      if ((float)(half_screen_width) * tangent(angle) <= (float)(half_screen_height)) {
+        x = half_screen_width;
+        y = (half_screen_width) * tangent(angle);
+      } else {
+        x = (int)((float)(half_screen_height) / (float)tangent(angle) + 0.5);
+        y = half_screen_height;
+      }
+    }
+
+    if (i >= 0 && i <= 6) {
+      x += bounds.size.w / 2;
+    } else {
+      x = bounds.size.w / 2 - x;
+    }
+    
+    if (i >= 9 || i <= 3) {
+      y = bounds.size.h / 2 - y;
+    } else {
+      y += bounds.size.h / 2;
+    }
+
+    ds->markers[i] = GPoint(x, y);
+  }
+}
 
 DialSpec* get_dial_spec() {
   DialSpec *ds = (DialSpec*) malloc(sizeof(DialSpec));
 
+  int half_screen_width = bounds.size.w / 2;
+  int half_screen_height = bounds.size.h / 2;
+
   // Common resource settings
   ds->logo_res = RESOURCE_ID_LOGO;
   ds->logo_size = GSize(38, 12);
+  ds->logo = GPoint(half_screen_width, bounds.size.h * 0.19 + ds->logo_size.h / 2);
   ds->models_res = RESOURCE_ID_MODELS;
   ds->model_size = GSize(71, 5);
+  ds->model = GPoint(half_screen_width, bounds.size.h * 0.19 + ds->logo_size.h + 1 + ds->model_size.h / 2);
   ds->day_res = RESOURCE_ID_DAYS;
   ds->day_size = GSize(30, 10);
   ds->moonphase_res = RESOURCE_ID_MOONPHASES;
   ds->moonphase_size = GSize(10, 10);
+  ds->moonphase = GPoint(half_screen_width, bounds.size.h * 0.19 + ds->logo_size.h + 1 + ds->model_size.h + 1 + ds->moonphase_size.h / 2 + 5);
 
-
-  // Logo, model, and moonphase positions
-  if (is_round()) {
-    ds->logo = GPoint(71, 39);
-    ds->model = GPoint(54, 52);
-    ds->moonphase = GPoint(85, 65);
-  }
-  else {
-    ds->logo = GPoint(53, 27);
-    ds->model = GPoint(36, 40);
-    ds->moonphase = GPoint(67, 53);
-  }
 
   // Font-dependant resources and positions (date, markers, digital time)
   if (get_font() == 1) {
@@ -314,70 +356,6 @@ DialSpec* get_dial_spec() {
     ds->digital_colon_size = GSize(4, 20);
     ds->digit_big_res = RESOURCE_ID_DIGITS_BIG1;
     ds->digit_big_size = GSize(20, 28);
-
-    if (is_round()) {
-      ds->markers[0] = GPoint(79, 5);
-      ds->markers[1] = GPoint(118, 20);
-      ds->markers[2] = GPoint(143, 45);
-      ds->markers[3] = GPoint(152, 80);
-      ds->markers[4] = GPoint(143, 115);
-      ds->markers[5] = GPoint(118, 140);
-      ds->markers[6] = GPoint(79, 155);
-      ds->markers[7] = GPoint(40, 140);
-      ds->markers[8] = GPoint(15, 115);
-      ds->markers[9] = GPoint(6, 80);
-      ds->markers[10] = GPoint(15, 45);
-      ds->markers[11] = GPoint(40, 20);
-
-      ds->date_box = GPoint(73, 115);
-      ds->date_single = GPoint(85, 119);
-      ds->day = GPoint(64, 94);
-      if (!is_digital()) {
-        ds->date1 = GPoint(79, 119);
-        ds->date2 = GPoint(91, 119);
-      } else {
-        ds->date1 = GPoint(100, 94);
-        ds->date2 = GPoint(108, 94);
-      }
-
-      ds->digital_box = GPoint(32, 105);
-      ds->digital_time1 = GPoint(40, 113);
-      ds->digital_time2 = GPoint(64, 113);
-      ds->digital_time3 = GPoint(96, 113);
-      ds->digital_time4 = GPoint(120, 113);
-      ds->digital_colon = GPoint(88, 117);
-    } else {
-      ds->markers[0] = GPoint(61, 2);
-      ds->markers[1] = GPoint(105, 2);
-      ds->markers[2] = GPoint(120, 39);
-      ds->markers[3] = GPoint(120, 74);
-      ds->markers[4] = GPoint(120, 110);
-      ds->markers[5] = GPoint(105, 147);
-      ds->markers[6] = GPoint(61, 147);
-      ds->markers[7] = GPoint(17, 147);
-      ds->markers[8] = GPoint(2, 110);
-      ds->markers[9] = GPoint(2, 74);
-      ds->markers[10] = GPoint(2, 39);
-      ds->markers[11] = GPoint(17, 2);
-
-      ds->date_box = GPoint(55, 114);
-      ds->date_single = GPoint(67, 118);
-      ds->day = GPoint(84, 105);
-      if (!is_digital()) {
-        ds->date1 = GPoint(61, 118);
-        ds->date2 = GPoint(73, 118);
-      } else {
-        ds->date1 = GPoint(118, 105);
-        ds->date2 = GPoint(128, 105);
-      }
-
-      ds->digital_box = GPoint(24, 116);
-      ds->digital_time1 = GPoint(32, 124);
-      ds->digital_time2 = GPoint(56, 124);
-      ds->digital_time3 = GPoint(88, 124);
-      ds->digital_time4 = GPoint(112, 124);
-      ds->digital_colon = GPoint(80, 128);
-    }
   } else if (get_font() == 2) {
     ds->date_box_res = RESOURCE_ID_DATE_BOX2;
     ds->date_box_size = GSize(30, 18);
@@ -392,70 +370,6 @@ DialSpec* get_dial_spec() {
     ds->digital_colon_size = GSize(2, 12);
     ds->digit_big_res = RESOURCE_ID_DIGITS_BIG2;
     ds->digit_big_size = GSize(20, 20);
-
-    if (is_round()) {
-      ds->markers[0] = GPoint(79, 5);
-      ds->markers[1] = GPoint(118, 22);
-      ds->markers[2] = GPoint(143, 47);
-      ds->markers[3] = GPoint(152, 82);
-      ds->markers[4] = GPoint(143, 117);
-      ds->markers[5] = GPoint(118, 142);
-      ds->markers[6] = GPoint(79, 161);
-      ds->markers[7] = GPoint(40, 142);
-      ds->markers[8] = GPoint(15, 117);
-      ds->markers[9] = GPoint(6, 82);
-      ds->markers[10] = GPoint(15, 47);
-      ds->markers[11] = GPoint(40, 22);
-
-      ds->date_box = GPoint(75, 117);
-      ds->date_single = GPoint(85, 121);
-      ds->day = GPoint(64, 98);
-      if (!is_digital()) {
-        ds->date1 = GPoint(79, 121);
-        ds->date2 = GPoint(91, 121);
-      } else {
-        ds->date1 = GPoint(100, 98);
-        ds->date2 = GPoint(108, 98);
-      }
-
-      ds->digital_box = GPoint(36, 109);
-      ds->digital_time1 = GPoint(45, 117);
-      ds->digital_time2 = GPoint(67, 117);
-      ds->digital_time3 = GPoint(93, 117);
-      ds->digital_time4 = GPoint(115, 117);
-      ds->digital_colon = GPoint(89, 121);
-    } else {
-      ds->markers[0] = GPoint(61, 2);
-      ds->markers[1] = GPoint(105, 2);
-      ds->markers[2] = GPoint(120, 41);
-      ds->markers[3] = GPoint(120, 76);
-      ds->markers[4] = GPoint(120, 112);
-      ds->markers[5] = GPoint(105, 151);
-      ds->markers[6] = GPoint(61, 151);
-      ds->markers[7] = GPoint(17, 151);
-      ds->markers[8] = GPoint(2, 112);
-      ds->markers[9] = GPoint(2, 76);
-      ds->markers[10] = GPoint(2, 41);
-      ds->markers[11] = GPoint(17, 2);
-
-      ds->date_box = GPoint(57, 116);
-      ds->date_single = GPoint(67, 118);
-      ds->day = GPoint(84, 109);
-      if (!is_digital()) {
-        ds->date1 = GPoint(61, 120);
-        ds->date2 = GPoint(73, 120);
-      } else {
-        ds->date1 = GPoint(118, 109);
-        ds->date2 = GPoint(128, 109);
-      }
-
-      ds->digital_box = GPoint(28, 120);
-      ds->digital_time1 = GPoint(37, 128);
-      ds->digital_time2 = GPoint(59, 128);
-      ds->digital_time3 = GPoint(85, 128);
-      ds->digital_time4 = GPoint(107, 128);
-      ds->digital_colon = GPoint(81, 132);
-    }
   } else {
     ds->date_box_res = RESOURCE_ID_DATE_BOX3;
     ds->date_box_size = GSize(30, 17);
@@ -470,76 +384,58 @@ DialSpec* get_dial_spec() {
     ds->digital_colon_size = GSize(2, 14);
     ds->digit_big_res = RESOURCE_ID_DIGITS_BIG3;
     ds->digit_big_size = GSize(20, 22);
-
-    if (is_round()) {
-      ds->markers[0] = GPoint(79, 5);
-      ds->markers[1] = GPoint(118, 22);
-      ds->markers[2] = GPoint(143, 47);
-      ds->markers[3] = GPoint(152, 82);
-      ds->markers[4] = GPoint(143, 117);
-      ds->markers[5] = GPoint(118, 142);
-      ds->markers[6] = GPoint(79, 161);
-      ds->markers[7] = GPoint(40, 142);
-      ds->markers[8] = GPoint(15, 117);
-      ds->markers[9] = GPoint(6, 82);
-      ds->markers[10] = GPoint(15, 47);
-      ds->markers[11] = GPoint(40, 22);
-
-      ds->date_box = GPoint(75, 118);
-      ds->date_single = GPoint(85, 121);
-      ds->day = GPoint(64, 99);
-      if (!is_digital()) {
-        ds->date1 = GPoint(79, 121);
-        ds->date2 = GPoint(91, 121);
-      } else {
-        ds->date1 = GPoint(100, 99);
-        ds->date2 = GPoint(108, 99);
-      }
-
-      ds->digital_box = GPoint(36, 110);
-      ds->digital_time1 = GPoint(45, 116);
-      ds->digital_time2 = GPoint(67, 116);
-      ds->digital_time3 = GPoint(93, 116);
-      ds->digital_time4 = GPoint(115, 116);
-      ds->digital_colon = GPoint(89, 120);
-    } else {
-      ds->markers[0] = GPoint(61, 2);
-      ds->markers[1] = GPoint(105, 2);
-      ds->markers[2] = GPoint(120, 41);
-      ds->markers[3] = GPoint(120, 76);
-      ds->markers[4] = GPoint(120, 112);
-      ds->markers[5] = GPoint(105, 150);
-      ds->markers[6] = GPoint(61, 150);
-      ds->markers[7] = GPoint(17, 150);
-      ds->markers[8] = GPoint(2, 112);
-      ds->markers[9] = GPoint(2, 76);
-      ds->markers[10] = GPoint(2, 41);
-      ds->markers[11] = GPoint(17, 2);
-
-      ds->date_box = GPoint(57, 117);
-      ds->date_single = GPoint(67, 120);
-      ds->day = GPoint(83, 110);
-      if (!is_digital()) {
-        ds->date1 = GPoint(61, 120);
-        ds->date2 = GPoint(73, 120);
-      } else {
-        ds->date1 = GPoint(118, 110);
-        ds->date2 = GPoint(128, 110);
-      }
-
-      ds->digital_box = GPoint(28, 121);
-      ds->digital_time1 = GPoint(37, 127);
-      ds->digital_time2 = GPoint(59, 127);
-      ds->digital_time3 = GPoint(85, 127);
-      ds->digital_time4 = GPoint(107, 127);
-      ds->digital_colon = GPoint(81, 131);
-    }
   }
 
-  // Digital watch date uses different digit font.
-  if (is_digital()) {
+  // Calculate positions for markers.
+  set_marker_positions(ds);
+
+  // Date box position (only for analog watch).
+  ds->date_box = GPoint(half_screen_width, bounds.size.h * 0.72);
+
+  if (!is_digital()) {
+    // Date positioning for analog watch.
+    int date_y = bounds.size.h * 0.72;
+    ds->date1 = GPoint(half_screen_width - ds->digit_size.w / 2 - 1, date_y);
+    ds->date2 = GPoint(half_screen_width + ds->digit_size.w / 2 + 1, date_y);
+    ds->date_single = GPoint(half_screen_width, date_y);
+  } else {
+    // Digital watch date uses different digit font.
     ds->digit_res = RESOURCE_ID_DIGITS_DIGITAL;
     ds->digit_size = GSize(8, 10);
+
+    // Digital time positioning.
+    int digital_time_x = 0;
+    int digital_time_y = 0;
+    if (!is_round()) {
+      digital_time_y = bounds.size.h * 0.82; 
+      if (is_large_screen()) {
+        digital_time_x = bounds.size.w - ds->digital_box_size.w / 2 - 8;
+      } else {
+        digital_time_x = bounds.size.w - ds->digital_box_size.w / 2 - 8;
+      }
+    } else {
+      digital_time_y = bounds.size.h * 0.7;
+      digital_time_x = half_screen_width;
+    }
+
+    ds->digital_box = GPoint(digital_time_x, digital_time_y);
+    ds->digital_colon = GPoint(digital_time_x, digital_time_y);
+    ds->digital_time2 = GPoint(digital_time_x - ds->digital_colon_size.w / 2 - 4 - ds->digit_big_size.w / 2, digital_time_y);
+    ds->digital_time1 = GPoint(digital_time_x - ds->digital_colon_size.w / 2 - 4 - ds->digit_big_size.w - 4 - ds->digit_big_size.w / 2, digital_time_y);
+    ds->digital_time3 = GPoint(digital_time_x + ds->digital_colon_size.w / 2 + 4 + ds->digit_big_size.w / 2, digital_time_y);
+    ds->digital_time4 = GPoint(digital_time_x + ds->digital_colon_size.w / 2 + 4 + ds->digit_big_size.w + 4 + ds->digit_big_size.w / 2, digital_time_y);
+
+    // Digital day + date positioning.
+    int digital_date_y = digital_time_y - ds->digital_box_size.h / 2 - 1 - ds->digit_size.h / 2;
+    int day_date_width = ds->day_size.w + 4 + ds->digit_size.w * 2 + 2;
+    int digital_date_x = half_screen_width;
+    if (!is_round()) {
+      digital_date_x = digital_time_x + ds->digital_box_size.w / 2 - 4 - day_date_width / 2;
+    }
+
+    ds->day = GPoint(digital_date_x - day_date_width / 2 + ds->day_size.w / 2, digital_date_y);
+    ds->date1 = GPoint(digital_date_x + day_date_width / 2 - ds->digit_size.w - 2 - ds->digit_size.w / 2, digital_date_y);
+    ds->date2 = GPoint(digital_date_x + day_date_width / 2  - ds->digit_size.w / 2, digital_date_y);
   }
 
   return ds;
@@ -561,22 +457,30 @@ static bool is_round() {
 #endif
 }
 
+static bool is_large_screen() {
+  if (PBL_PLATFORM_TYPE_CURRENT == PlatformTypeEmery) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 static void update_date() {
 #ifdef LOG
   APP_LOG(APP_LOG_LEVEL_INFO, "Updating Date");
 #endif
 
-  binary_image_mask_data_clear_region(dial, GRect(ds->date1.x, ds->date1.y, ds->digit_size.w, ds->digit_size.h));
-  binary_image_mask_data_clear_region(dial, GRect(ds->date2.x, ds->date2.y, ds->digit_size.w, ds->digit_size.h));
+  binary_image_mask_data_clear_region(dial, GRect(ds->date1.x, ds->date1.y, ds->digit_size.w, ds->digit_size.h), true);
+  binary_image_mask_data_clear_region(dial, GRect(ds->date2.x, ds->date2.y, ds->digit_size.w, ds->digit_size.h), true);
   int d1 = current_date / 10;
   int d2 = current_date % 10;
-  binary_image_mask_data_draw(dial, digits, ds->date1, GRect(d1*ds->digit_size.w, 0, ds->digit_size.w, ds->digit_size.h));
-  binary_image_mask_data_draw(dial, digits, ds->date2, GRect(d2*ds->digit_size.w, 0, ds->digit_size.w, ds->digit_size.h));
+  binary_image_mask_data_draw(dial, digits, ds->date1, GRect(d1*ds->digit_size.w, 0, ds->digit_size.w, ds->digit_size.h), true);
+  binary_image_mask_data_draw(dial, digits, ds->date2, GRect(d2*ds->digit_size.w, 0, ds->digit_size.w, ds->digit_size.h), true);
 
   if (is_digital()) {
-    binary_image_mask_data_clear_region(dial, GRect(ds->day.x, ds->day.y, ds->day_size.w, ds->day_size.h));
+    binary_image_mask_data_clear_region(dial, GRect(ds->day.x, ds->day.y, ds->day_size.w, ds->day_size.h), true);
     BinaryImageMaskData *day = binary_image_mask_data_create_from_resource(GSize(ds->day_size.w, ds->day_size.h * 7), ds->day_res);
-    binary_image_mask_data_draw(dial, day, ds->day, GRect(0, current_day*ds->day_size.h, ds->day_size.w, ds->day_size.h));
+    binary_image_mask_data_draw(dial, day, ds->day, GRect(0, current_day*ds->day_size.h, ds->day_size.w, ds->day_size.h), true);
     binary_image_mask_data_destroy(day);
   }
 }
@@ -605,13 +509,13 @@ static int get_moonphase_index() {
 
 static void update_moonphase() {
   BinaryImageMaskData *moonphases = binary_image_mask_data_create_from_resource(GSize(ds->moonphase_size.w, ds->moonphase_size.h * 20), ds->moonphase_res);
-  binary_image_mask_data_clear_region(dial, GRect(ds->moonphase.x, ds->moonphase.y, ds->moonphase_size.w, ds->moonphase_size.h));
+  binary_image_mask_data_clear_region(dial, GRect(ds->moonphase.x, ds->moonphase.y, ds->moonphase_size.w, ds->moonphase_size.h), true);
 #ifdef MOONPHASE
   int phase = MOONPHASE;
 #else
   int phase = get_moonphase_index();
 #endif
-  binary_image_mask_data_draw(dial, moonphases, ds->moonphase, GRect(0, phase*ds->moonphase_size.h, ds->moonphase_size.w, ds->moonphase_size.h));
+  binary_image_mask_data_draw(dial, moonphases, ds->moonphase, GRect(0, phase*ds->moonphase_size.h, ds->moonphase_size.w, ds->moonphase_size.h), true);
   binary_image_mask_data_destroy(moonphases);
 }
 
@@ -619,10 +523,10 @@ static void update_digital_time(struct tm *tick_time) {
 #ifdef LOG
   APP_LOG(APP_LOG_LEVEL_INFO, "Updating Digital Time");
 #endif
-  binary_image_mask_data_clear_region(dial, GRect(ds->digital_time1.x, ds->digital_time1.y, ds->digit_big_size.w, ds->digit_big_size.h));
-  binary_image_mask_data_clear_region(dial, GRect(ds->digital_time2.x, ds->digital_time2.y, ds->digit_big_size.w, ds->digit_big_size.h));
-  binary_image_mask_data_clear_region(dial, GRect(ds->digital_time3.x, ds->digital_time3.y, ds->digit_big_size.w, ds->digit_big_size.h));
-  binary_image_mask_data_clear_region(dial, GRect(ds->digital_time4.x, ds->digital_time4.y, ds->digit_big_size.w, ds->digit_big_size.h));
+  binary_image_mask_data_clear_region(dial, GRect(ds->digital_time1.x, ds->digital_time1.y, ds->digit_big_size.w, ds->digit_big_size.h), true);
+  binary_image_mask_data_clear_region(dial, GRect(ds->digital_time2.x, ds->digital_time2.y, ds->digit_big_size.w, ds->digit_big_size.h), true);
+  binary_image_mask_data_clear_region(dial, GRect(ds->digital_time3.x, ds->digital_time3.y, ds->digit_big_size.w, ds->digit_big_size.h), true);
+  binary_image_mask_data_clear_region(dial, GRect(ds->digital_time4.x, ds->digital_time4.y, ds->digit_big_size.w, ds->digit_big_size.h), true);
 
 #ifdef QUICKTEST
   int seconds = tick_time->tm_sec;
@@ -662,10 +566,10 @@ static void update_digital_time(struct tm *tick_time) {
   int m2 = minutes % 10;
 
 
-  binary_image_mask_data_draw(dial, digits_big, ds->digital_time1, GRect(h1*ds->digit_big_size.w, 0, ds->digit_big_size.w, ds->digit_big_size.h));
-  binary_image_mask_data_draw(dial, digits_big, ds->digital_time2, GRect(h2*ds->digit_big_size.w, 0, ds->digit_big_size.w, ds->digit_big_size.h));
-  binary_image_mask_data_draw(dial, digits_big, ds->digital_time3, GRect(m1*ds->digit_big_size.w, 0, ds->digit_big_size.w, ds->digit_big_size.h));
-  binary_image_mask_data_draw(dial, digits_big, ds->digital_time4, GRect(m2*ds->digit_big_size.w, 0, ds->digit_big_size.w, ds->digit_big_size.h));
+  binary_image_mask_data_draw(dial, digits_big, ds->digital_time1, GRect(h1*ds->digit_big_size.w, 0, ds->digit_big_size.w, ds->digit_big_size.h), true);
+  binary_image_mask_data_draw(dial, digits_big, ds->digital_time2, GRect(h2*ds->digit_big_size.w, 0, ds->digit_big_size.w, ds->digit_big_size.h), true);
+  binary_image_mask_data_draw(dial, digits_big, ds->digital_time3, GRect(m1*ds->digit_big_size.w, 0, ds->digit_big_size.w, ds->digit_big_size.h), true);
+  binary_image_mask_data_draw(dial, digits_big, ds->digital_time4, GRect(m2*ds->digit_big_size.w, 0, ds->digit_big_size.w, ds->digit_big_size.h), true);
 }
 
 static void unobstructed_change_handler(AnimationProgress progress, void *context) {
@@ -975,7 +879,9 @@ static void draw_dial() {
   binary_image_mask_data_destroy(digits);
   binary_image_mask_data_destroy(digits_big);
 
-  free(ds);
+  if (ds != NULL) {
+    free(ds);
+  }
   ds = get_dial_spec();
 
   dial = binary_image_mask_data_create(bounds.size);
@@ -984,7 +890,7 @@ static void draw_dial() {
   if (!settings.DigitalWatch) {
     BinaryImageMaskData *markers = binary_image_mask_data_create_from_resource(GSize(ds->marker_size.w, ds->marker_size.h * 12), ds->marker_res);
     for (int i = 0; i < 12; i++) {
-      binary_image_mask_data_draw(dial, markers, ds->markers[i], GRect(0, ds->marker_size.h * i, ds->marker_size.w, ds->marker_size.h));
+      binary_image_mask_data_draw(dial, markers, ds->markers[i], GRect(0, ds->marker_size.h * i, ds->marker_size.w, ds->marker_size.h), true);
     }
     binary_image_mask_data_destroy(markers);
   }
@@ -995,7 +901,7 @@ static void draw_dial() {
 
   if (settings.EnablePebbleLogo) {
     BinaryImageMaskData *logo = binary_image_mask_data_create_from_resource(ds->logo_size, ds->logo_res);
-    binary_image_mask_data_draw(dial, logo, ds->logo, GRect(0, 0, ds->logo_size.w, ds->logo_size.h));
+    binary_image_mask_data_draw(dial, logo, ds->logo, GRect(0, 0, ds->logo_size.w, ds->logo_size.h), true);
     binary_image_mask_data_destroy(logo);
   }
 
@@ -1037,13 +943,13 @@ static void draw_dial() {
         index = 8;
         break;
     }
-    binary_image_mask_data_draw(dial, models, ds->model, GRect(0, ds->model_size.h * index, ds->model_size.w, ds->model_size.h));
+    binary_image_mask_data_draw(dial, models, ds->model, GRect(0, ds->model_size.h * index, ds->model_size.w, ds->model_size.h), true);
     binary_image_mask_data_destroy(models);
   }
 
   if (settings.EnableDate && !settings.DigitalWatch) {
     BinaryImageMaskData *date_box = binary_image_mask_data_create_from_resource(ds->date_box_size, ds->date_box_res);
-    binary_image_mask_data_draw(dial, date_box, ds->date_box, GRect(0, 0, ds->date_box_size.w, ds->date_box_size.h));
+    binary_image_mask_data_draw(dial, date_box, ds->date_box, GRect(0, 0, ds->date_box_size.w, ds->date_box_size.h), true);
     binary_image_mask_data_destroy(date_box);
   }
 
@@ -1057,11 +963,11 @@ static void draw_dial() {
 
   if (settings.DigitalWatch) {
     BinaryImageMaskData *digital_box = binary_image_mask_data_create_from_resource(ds->digital_box_size, ds->digital_box_res);
-    binary_image_mask_data_draw(dial, digital_box, ds->digital_box, GRect(0, 0, ds->digital_box_size.w, ds->digital_box_size.h));
+    binary_image_mask_data_draw(dial, digital_box, ds->digital_box, GRect(0, 0, ds->digital_box_size.w, ds->digital_box_size.h), true);
     binary_image_mask_data_destroy(digital_box);
 
     BinaryImageMaskData *digital_colon = binary_image_mask_data_create_from_resource(ds->digital_colon_size, ds->digital_colon_res);
-    binary_image_mask_data_draw(dial, digital_colon, ds->digital_colon, GRect(0, 0, ds->digital_colon_size.w, ds->digital_colon_size.h));
+    binary_image_mask_data_draw(dial, digital_colon, ds->digital_colon, GRect(0, 0, ds->digital_colon_size.w, ds->digital_colon_size.h), true);
     binary_image_mask_data_destroy(digital_colon);
 
     update_digital_time(prv_tick_time);

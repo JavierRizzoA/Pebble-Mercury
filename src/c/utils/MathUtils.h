@@ -10,3 +10,6 @@ float slope_from_two_points(GPoint a, GPoint b);
 int min(int a, int b);
 int max(int a, int b);
 double fmod(double a, double b);
+float sine(int32_t angle);
+float cosine(int32_t angle);
+float tangent(int32_t angle);

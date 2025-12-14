@@ -69,3 +69,15 @@ double fmod(double a, double b) {
     if (result < 0) result += b;
     return result;
 }
+
+float sine(int32_t angle) {
+  return ((float)sin_lookup(DEG_TO_TRIGANGLE(angle)) / ((float)TRIG_MAX_ANGLE));
+}
+
+float cosine(int32_t angle) {
+  return ((float)cos_lookup(DEG_TO_TRIGANGLE(angle)) / ((float)TRIG_MAX_ANGLE));
+}
+
+float tangent(int32_t angle) {
+  return sine(angle) / cosine(angle);
+}
