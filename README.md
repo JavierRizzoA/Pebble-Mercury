@@ -11,14 +11,14 @@ This watchface was made for the
 
 ## Screenshots
 
-| Aplite/Diorite/Flint                                  | Basalt                                 | Chalk                                   |
-| ----------------------------------------------------- | -------------------------------------  | --------------------------------------- |
-| ![Aplite/Diorite/Flint](img/screenshots/diorite1.png) | ![Basalt](img/screenshots/basalt1.png) | ![Chalk](img/screenshots/chalk1.png)    |
-| ![Aplite/Diorite/Flint](img/screenshots/diorite2.png) | ![Basalt](img/screenshots/basalt2.png) | ![Chalk](img/screenshots/chalk2.png)    |
-| ![Aplite/Diorite/Flint](img/screenshots/diorite3.png) | ![Basalt](img/screenshots/basalt3.png) | ![Chalk](img/screenshots/chalk3.png)    |
-| ![Aplite/Diorite/Flint](img/screenshots/diorite4.png) | ![Basalt](img/screenshots/basalt4.png) | ![Chalk](img/screenshots/chalk4.png)    |
-| ![Aplite/Diorite/Flint](img/screenshots/diorite5.png) | ![Basalt](img/screenshots/basalt5.png) | ![Chalk](img/screenshots/chalk5.png)    |
-| ![Aplite/Diorite/Flint](img/screenshots/diorite6.png) | ![Basalt](img/screenshots/basalt6.png) | ![Chalk](img/screenshots/chalk6.png)    |
+| Aplite/Diorite/Flint                                  | Basalt                                 | Chalk                                   | Emery                                |
+| ----------------------------------------------------- | -------------------------------------  | --------------------------------------- | ------------------------------------ |
+| ![Aplite/Diorite/Flint](img/screenshots/diorite1.png) | ![Basalt](img/screenshots/basalt1.png) | ![Chalk](img/screenshots/chalk1.png)    | ![Emery](img/screenshots/emery1.png) |
+| ![Aplite/Diorite/Flint](img/screenshots/diorite2.png) | ![Basalt](img/screenshots/basalt2.png) | ![Chalk](img/screenshots/chalk2.png)    | ![Emery](img/screenshots/emery2.png) |
+| ![Aplite/Diorite/Flint](img/screenshots/diorite3.png) | ![Basalt](img/screenshots/basalt3.png) | ![Chalk](img/screenshots/chalk3.png)    | ![Emery](img/screenshots/emery3.png) |
+| ![Aplite/Diorite/Flint](img/screenshots/diorite4.png) | ![Basalt](img/screenshots/basalt4.png) | ![Chalk](img/screenshots/chalk4.png)    | ![Emery](img/screenshots/emery4.png) |
+| ![Aplite/Diorite/Flint](img/screenshots/diorite5.png) | ![Basalt](img/screenshots/basalt5.png) | ![Chalk](img/screenshots/chalk5.png)    | ![Emery](img/screenshots/emery5.png) |
+| ![Aplite/Diorite/Flint](img/screenshots/diorite6.png) | ![Basalt](img/screenshots/basalt6.png) | ![Chalk](img/screenshots/chalk6.png)    | ![Emery](img/screenshots/emery6.png) |
 
 ## Installing
 
