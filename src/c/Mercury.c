@@ -1142,6 +1142,12 @@ static void draw_dial() {
         index = 9;
         break;
 #endif
+      case WATCH_INFO_MODEL_PEBBLE_TIME_2:
+#ifndef PBL_PLATFORM_APLITE
+      case WATCH_INFO_MODEL_COREDEVICES_CT2:
+#endif
+        index = 10;
+        break;
       default:
         index = 8;
         break;
