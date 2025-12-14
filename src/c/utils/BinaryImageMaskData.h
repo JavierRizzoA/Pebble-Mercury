@@ -14,8 +14,8 @@ struct BinaryImageMaskData* binary_image_mask_data_create_from_resource(GSize si
 
 void binary_image_mask_data_set_bit(BinaryImageMaskData* bimd, int x, int y, bool val);
 
-void binary_image_mask_data_clear_region(BinaryImageMaskData* bimd, GRect region);
+void binary_image_mask_data_clear_region(BinaryImageMaskData* bimd, GRect region, bool centered);
 
 bool binary_image_mask_data_get_pixel(BinaryImageMaskData* bimd, int x, int y);
 
-void binary_image_mask_data_draw(BinaryImageMaskData* dest, BinaryImageMaskData* src, GPoint dest_pos, GRect src_reg);
+void binary_image_mask_data_draw(BinaryImageMaskData* dest, BinaryImageMaskData* src, GPoint dest_pos, GRect src_reg, bool centered);
