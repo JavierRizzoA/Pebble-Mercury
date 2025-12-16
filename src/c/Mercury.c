@@ -10,17 +10,18 @@ static GRect bounds;
 
 static struct tm *prv_tick_time;
 
-static struct BinaryImageMaskData *dial;
-static struct BinaryImageMaskData *digits;
-static struct BinaryImageMaskData *digits_big;
+static struct BinaryImageMaskData *dial = NULL;
+static struct BinaryImageMaskData *digits = NULL;
+static struct BinaryImageMaskData *digits_big = NULL;
 static int current_date = -1;
 static int current_day = -1;
 static ClaySettings settings;
-static DialSpec *ds;
+static DialSpec *ds = NULL;
 static int offset_y = 0;
 
 //#define LOG
 //#define LOGTIME
+//#define LOGPERF
 //#define QUICKTEST
 
 //#define HOUR 22
@@ -30,6 +31,7 @@ static int offset_y = 0;
 //#define DATE 6
 
 //#define DIGITAL true
+//#define SECONDS true
 //#define FONT 1
 //#define BGC1 GColorCobaltBlue
 //#define BGC2 GColorPastelYellow
@@ -52,7 +54,7 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context);
 static void update_date();
 static void update_moonphase();
 static int get_moonphase_index();
-static void update_digital_time(struct tm *tick_time);
+static void update_digital_time();
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed);
 static void draw_fancy_hand(GContext *ctx, int angle, int length, GColor fill_color, GColor border_color);
 static void draw_line_hand(GContext *ctx, int angle, int length, int back_length, GColor color);
@@ -78,11 +80,15 @@ static void prv_save_settings(void) {
 }
 
 static void prv_default_settings(void) {
-  settings.EnableSecondsHand = true;
   settings.EnableDate = true;
   settings.EnablePebbleLogo = true;
   settings.EnableWatchModel = true;
   settings.EnableMoonphase = true;
+#ifdef SECONDS
+  settings.EnableSecondsHand = SECONDS;
+#else
+  settings.EnableSecondsHand = true;
+#endif
 #ifdef DIGITAL
   settings.DigitalWatch = DIGITAL;
 #else
@@ -168,8 +174,10 @@ static void prv_load_settings(void) {
 }
 
 static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) {
-#ifdef LOG
-  APP_LOG(APP_LOG_LEVEL_INFO, "Received message");
+#ifdef LOGPERF
+  time_t start_sec, end_sec;
+  uint16_t start_ms, end_ms;
+  time_ms(&start_sec, &start_ms);
 #endif
 
   Tuple *enable_seconds_t = dict_find(iter, MESSAGE_KEY_EnableSecondsHand);
@@ -197,6 +205,7 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
 
   if(enable_seconds_t) {
     settings.EnableSecondsHand = enable_seconds_t->value->int32 == 1;
+
     tick_timer_service_unsubscribe();
     if (settings.EnableSecondsHand && !settings.DigitalWatch) {
       tick_timer_service_subscribe(SECOND_UNIT, tick_handler);
@@ -218,6 +227,13 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
   }
   if(digital_watch_t) {
     settings.DigitalWatch = digital_watch_t->value->int32 == 1;
+
+    tick_timer_service_unsubscribe();
+    if (settings.EnableSecondsHand && !settings.DigitalWatch) {
+      tick_timer_service_subscribe(SECOND_UNIT, tick_handler);
+    } else {
+      tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
+    }
   }
   if (bg_color1_t) {
     settings.BackgroundColor1 = GColorFromHEX(bg_color1_t->value->int32);
@@ -270,10 +286,28 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
 
   prv_save_settings();
   draw_dial();
+
+#ifdef LOG
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "BG dirty because of inbox");
+#endif
+
+  layer_mark_dirty(s_canvas_layer);
   layer_mark_dirty(s_bg_layer);
+
+#ifdef LOGPERF
+  time_ms(&end_sec, &end_ms);
+  int elapsed_ms = (int)((end_sec - start_sec) * 1000 + (end_ms - start_ms));
+  APP_LOG(APP_LOG_LEVEL_INFO, "Receive inbox: %d ms", elapsed_ms);
+#endif
 }
 
 static void set_marker_positions(DialSpec* ds) {
+#ifdef LOGPERF
+  time_t start_sec, end_sec;
+  uint16_t start_ms, end_ms;
+  time_ms(&start_sec, &start_ms);
+#endif
+
   int margin = 2;
   if (is_large_screen()) {
     margin = 8;
@@ -310,7 +344,7 @@ static void set_marker_positions(DialSpec* ds) {
     } else {
       x = bounds.size.w / 2 - x;
     }
-    
+
     if (i >= 9 || i <= 3) {
       y = bounds.size.h / 2 - y;
     } else {
@@ -319,9 +353,21 @@ static void set_marker_positions(DialSpec* ds) {
 
     ds->markers[i] = GPoint(x, y);
   }
+
+#ifdef LOGPERF
+  time_ms(&end_sec, &end_ms);
+  int elapsed_ms = (int)((end_sec - start_sec) * 1000 + (end_ms - start_ms));
+  APP_LOG(APP_LOG_LEVEL_INFO, "Time to set marker positions: %d ms", elapsed_ms);
+#endif
 }
 
 DialSpec* get_dial_spec() {
+#ifdef LOGPERF
+  time_t start_sec, end_sec;
+  uint16_t start_ms, end_ms;
+  time_ms(&start_sec, &start_ms);
+#endif
+
   DialSpec *ds = (DialSpec*) malloc(sizeof(DialSpec));
 
   int half_screen_width = bounds.size.w / 2;
@@ -439,6 +485,12 @@ DialSpec* get_dial_spec() {
   }
 
   return ds;
+
+#ifdef LOGPERF
+  time_ms(&end_sec, &end_ms);
+  int elapsed_ms = (int)((end_sec - start_sec) * 1000 + (end_ms - start_ms));
+  APP_LOG(APP_LOG_LEVEL_INFO, "Time to get dial spec: %d ms", elapsed_ms);
+#endif
 }
 
 static int get_font() {
@@ -466,8 +518,10 @@ static bool is_large_screen() {
 }
 
 static void update_date() {
-#ifdef LOG
-  APP_LOG(APP_LOG_LEVEL_INFO, "Updating Date");
+#ifdef LOGPERF
+  time_t start_sec, end_sec;
+  uint16_t start_ms, end_ms;
+  time_ms(&start_sec, &start_ms);
 #endif
 
   binary_image_mask_data_clear_region(dial, GRect(ds->date1.x, ds->date1.y, ds->digit_size.w, ds->digit_size.h), true);
@@ -482,10 +536,23 @@ static void update_date() {
     BinaryImageMaskData *day = binary_image_mask_data_create_from_resource(GSize(ds->day_size.w, ds->day_size.h * 7), ds->day_res);
     binary_image_mask_data_draw(dial, day, ds->day, GRect(0, current_day*ds->day_size.h, ds->day_size.w, ds->day_size.h), true);
     binary_image_mask_data_destroy(day);
+    day = NULL;
   }
+
+#ifdef LOGPERF
+  time_ms(&end_sec, &end_ms);
+  int elapsed_ms = (int)((end_sec - start_sec) * 1000 + (end_ms - start_ms));
+  APP_LOG(APP_LOG_LEVEL_INFO, "Time to update date: %d ms", elapsed_ms);
+#endif
 }
 
 static int get_moonphase_index() {
+#ifdef LOGPERF
+  time_t start_sec, end_sec;
+  uint16_t start_ms, end_ms;
+  time_ms(&start_sec, &start_ms);
+#endif
+
   const double synodic_month = 29.53;
   struct tm ref = {0};
   ref.tm_year = 2000 - 1900;
@@ -504,10 +571,22 @@ static int get_moonphase_index() {
   int index = (int)(phase_fraction * 20.0);
   if (index > 19) index = 19;
 
+#ifdef LOGPERF
+  time_ms(&end_sec, &end_ms);
+  int elapsed_ms = (int)((end_sec - start_sec) * 1000 + (end_ms - start_ms));
+  APP_LOG(APP_LOG_LEVEL_INFO, "Time to get moonphase index: %d ms", elapsed_ms);
+#endif
+
   return index;
 }
 
 static void update_moonphase() {
+#ifdef LOGPERF
+  time_t start_sec, end_sec;
+  uint16_t start_ms, end_ms;
+  time_ms(&start_sec, &start_ms);
+#endif
+
   BinaryImageMaskData *moonphases = binary_image_mask_data_create_from_resource(GSize(ds->moonphase_size.w, ds->moonphase_size.h * 20), ds->moonphase_res);
   binary_image_mask_data_clear_region(dial, GRect(ds->moonphase.x, ds->moonphase.y, ds->moonphase_size.w, ds->moonphase_size.h), true);
 #ifdef MOONPHASE
@@ -517,19 +596,29 @@ static void update_moonphase() {
 #endif
   binary_image_mask_data_draw(dial, moonphases, ds->moonphase, GRect(0, phase*ds->moonphase_size.h, ds->moonphase_size.w, ds->moonphase_size.h), true);
   binary_image_mask_data_destroy(moonphases);
+  moonphases = NULL;
+
+#ifdef LOGPERF
+  time_ms(&end_sec, &end_ms);
+  int elapsed_ms = (int)((end_sec - start_sec) * 1000 + (end_ms - start_ms));
+  APP_LOG(APP_LOG_LEVEL_INFO, "Time to update moonphase: %d ms", elapsed_ms);
+#endif
 }
 
-static void update_digital_time(struct tm *tick_time) {
-#ifdef LOG
-  APP_LOG(APP_LOG_LEVEL_INFO, "Updating Digital Time");
+static void update_digital_time() {
+#ifdef LOGPERF
+  time_t start_sec, end_sec;
+  uint16_t start_ms, end_ms;
+  time_ms(&start_sec, &start_ms);
 #endif
+
   binary_image_mask_data_clear_region(dial, GRect(ds->digital_time1.x, ds->digital_time1.y, ds->digit_big_size.w, ds->digit_big_size.h), true);
   binary_image_mask_data_clear_region(dial, GRect(ds->digital_time2.x, ds->digital_time2.y, ds->digit_big_size.w, ds->digit_big_size.h), true);
   binary_image_mask_data_clear_region(dial, GRect(ds->digital_time3.x, ds->digital_time3.y, ds->digit_big_size.w, ds->digit_big_size.h), true);
   binary_image_mask_data_clear_region(dial, GRect(ds->digital_time4.x, ds->digital_time4.y, ds->digit_big_size.w, ds->digit_big_size.h), true);
 
 #ifdef QUICKTEST
-  int seconds = tick_time->tm_sec;
+  int seconds = prv_tick_time->tm_sec;
 #endif
   int minutes = prv_tick_time->tm_min;
   int hours = prv_tick_time->tm_hour;
@@ -570,9 +659,21 @@ static void update_digital_time(struct tm *tick_time) {
   binary_image_mask_data_draw(dial, digits_big, ds->digital_time2, GRect(h2*ds->digit_big_size.w, 0, ds->digit_big_size.w, ds->digit_big_size.h), true);
   binary_image_mask_data_draw(dial, digits_big, ds->digital_time3, GRect(m1*ds->digit_big_size.w, 0, ds->digit_big_size.w, ds->digit_big_size.h), true);
   binary_image_mask_data_draw(dial, digits_big, ds->digital_time4, GRect(m2*ds->digit_big_size.w, 0, ds->digit_big_size.w, ds->digit_big_size.h), true);
+
+#ifdef LOGPERF
+  time_ms(&end_sec, &end_ms);
+  int elapsed_ms = (int)((end_sec - start_sec) * 1000 + (end_ms - start_ms));
+  APP_LOG(APP_LOG_LEVEL_INFO, "Time to update digital time: %d ms", elapsed_ms);
+#endif
 }
 
 static void unobstructed_change_handler(AnimationProgress progress, void *context) {
+#ifdef LOGPERF
+  time_t start_sec, end_sec;
+  uint16_t start_ms, end_ms;
+  time_ms(&start_sec, &start_ms);
+#endif
+
   Layer *window_layer = window_get_root_layer(s_window);
   GRect fullscreen = layer_get_frame(window_layer);
   GRect obstructed = layer_get_unobstructed_bounds(window_layer);
@@ -581,24 +682,48 @@ static void unobstructed_change_handler(AnimationProgress progress, void *contex
   if (!is_digital()) {
     offset = offset / 2;
   }
-  offset_y = -offset;
-  fullscreen.origin.y = 0 - offset;
-  layer_set_frame(window_layer, fullscreen);
+
+  if (offset != -offset_y) {
+    offset_y = -offset;
+    fullscreen.origin.y = 0 - offset;
+    layer_set_frame(window_layer, fullscreen);
+  }
+
+#ifdef LOGPERF
+  time_ms(&end_sec, &end_ms);
+  int elapsed_ms = (int)((end_sec - start_sec) * 1000 + (end_ms - start_ms));
+  APP_LOG(APP_LOG_LEVEL_INFO, "Time to handle unobstructed: %d ms", elapsed_ms);
+#endif
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
+#ifdef LOGPERF
+  time_t start_sec, end_sec;
+  uint16_t start_ms, end_ms;
+  time_ms(&start_sec, &start_ms);
+#endif
+
+  if (tick_time->tm_min == prv_tick_time->tm_min
+      && tick_time->tm_hour == prv_tick_time->tm_hour
+      && (tick_time->tm_sec == prv_tick_time->tm_sec || !settings.EnableSecondsHand || settings.DigitalWatch)) {
+#ifdef LOG
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "Tick handler returning due to no time diff.");
+#endif
+    return;
+  }
+
   time_t temp = time(NULL);
   prv_tick_time = localtime(&temp);
 
 #ifdef LOGTIME
-  int seconds = tick_time->tm_sec;
-  int minutes = tick_time->tm_min;
-  int hours = tick_time->tm_hour;
+  int seconds = prv_tick_time->tm_sec;
+  int minutes = prv_tick_time->tm_min;
+  int hours = prv_tick_time->tm_hour;
   APP_LOG(APP_LOG_LEVEL_INFO, "Time: %d:%d:%d", hours, minutes, seconds);
 #endif
 
   if (settings.EnableDate || settings.EnableMoonphase) {
-    int date = tick_time->tm_mday;
+    int date = prv_tick_time->tm_mday;
     if (current_date != date) {
 #ifdef DATE
       current_date = DATE;
@@ -609,7 +734,7 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 #ifdef DAY
       current_day = DAY;
 #else
-      current_day = tick_time->tm_wday;
+      current_day = prv_tick_time->tm_wday;
 #endif
       if (settings.EnableDate) {
         update_date();
@@ -622,15 +747,31 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   }
 
   if (settings.DigitalWatch) {
-    update_digital_time(tick_time);
+    update_digital_time();
   }
+
+#ifdef LOG
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Canvas & BG dirty because of tick");
+#endif
 
   layer_mark_dirty(s_canvas_layer);
   layer_mark_dirty(s_bg_layer);
+
+#ifdef LOGPERF
+  time_ms(&end_sec, &end_ms);
+  int elapsed_ms = (int)((end_sec - start_sec) * 1000 + (end_ms - start_ms));
+  APP_LOG(APP_LOG_LEVEL_INFO, "Time handle tick: %d ms", elapsed_ms);
+#endif
 }
 
 
 static void draw_fancy_hand(GContext *ctx, int angle, int length, GColor fill_color, GColor border_color) {
+#ifdef LOGPERF
+  time_t start_sec, end_sec;
+  uint16_t start_ms, end_ms;
+  time_ms(&start_sec, &start_ms);
+#endif
+
   GPoint origin = GPoint(bounds.size.w / 2, bounds.size.h / 2);
   int p1l = 15;
   int p2l = length;
@@ -647,9 +788,21 @@ static void draw_fancy_hand(GContext *ctx, int angle, int length, GColor fill_co
   graphics_context_set_stroke_color(ctx, fill_color);
   graphics_context_set_stroke_width(ctx, 3);
   graphics_draw_line(ctx, p1, p2);
+
+#ifdef LOGPERF
+  time_ms(&end_sec, &end_ms);
+  int elapsed_ms = (int)((end_sec - start_sec) * 1000 + (end_ms - start_ms));
+  APP_LOG(APP_LOG_LEVEL_INFO, "Time to draw fancy hand: %d ms", elapsed_ms);
+#endif
 }
 
 static void draw_line_hand(GContext *ctx, int angle, int length, int back_length, GColor color) {
+#ifdef LOGPERF
+  time_t start_sec, end_sec;
+  uint16_t start_ms, end_ms;
+  time_ms(&start_sec, &start_ms);
+#endif
+
   GPoint origin = GPoint(bounds.size.w / 2, bounds.size.h / 2);
   GPoint p1 = polar_to_point_offset(origin, angle + 180, back_length);
   GPoint p2 = polar_to_point_offset(origin, angle, length);
@@ -665,9 +818,21 @@ static void draw_line_hand(GContext *ctx, int angle, int length, int back_length
   graphics_context_set_stroke_width(ctx, 1);
   graphics_draw_line(ctx, p1, p2);
 #endif
+
+#ifdef LOGPERF
+  time_ms(&end_sec, &end_ms);
+  int elapsed_ms = (int)((end_sec - start_sec) * 1000 + (end_ms - start_ms));
+  APP_LOG(APP_LOG_LEVEL_INFO, "Time to draw line hand: %d ms", elapsed_ms);
+#endif
 }
 
 static void draw_center(GContext *ctx, GColor minutes_border, GColor minutes_color, GColor seconds_color) {
+#ifdef LOGPERF
+  time_t start_sec, end_sec;
+  uint16_t start_ms, end_ms;
+  time_ms(&start_sec, &start_ms);
+#endif
+
   GPoint origin = GPoint(bounds.size.w / 2, bounds.size.h / 2);
   graphics_context_set_antialiased(ctx, false);
   graphics_context_set_fill_color(ctx, minutes_border);
@@ -676,10 +841,22 @@ static void draw_center(GContext *ctx, GColor minutes_border, GColor minutes_col
   graphics_fill_circle(ctx, origin, 4);
   graphics_context_set_fill_color(ctx, minutes_color);
   graphics_fill_circle(ctx, origin, 2);
+
+#ifdef LOGPERF
+  time_ms(&end_sec, &end_ms);
+  int elapsed_ms = (int)((end_sec - start_sec) * 1000 + (end_ms - start_ms));
+  APP_LOG(APP_LOG_LEVEL_INFO, "Time to draw center: %d ms", elapsed_ms);
+#endif
 }
 
 
 static void canvas_update_proc(Layer *layer, GContext *ctx) {
+#ifdef LOGPERF
+  time_t start_sec, end_sec;
+  uint16_t start_ms, end_ms;
+  time_ms(&start_sec, &start_ms);
+#endif
+
   int seconds = prv_tick_time->tm_sec;
   int minutes = prv_tick_time->tm_min;
   int hours = prv_tick_time->tm_hour % 12;
@@ -736,6 +913,12 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
     draw_center(ctx, GColorBlack, GColorWhite, GColorBlack);
 #endif
   }
+
+#ifdef LOGPERF
+  time_ms(&end_sec, &end_ms);
+  int elapsed_ms = (int)((end_sec - start_sec) * 1000 + (end_ms - start_ms));
+  APP_LOG(APP_LOG_LEVEL_INFO, "Time to draw canvas: %d ms", elapsed_ms);
+#endif
 }
 
 static bool byte_get_bit(uint8_t *byte, uint8_t bit) {
@@ -760,10 +943,14 @@ static void set_pixel_color(GBitmapDataRowInfo info, GPoint point, GColor color)
 
 
 static void bg_update_proc(Layer *layer, GContext *ctx) {
-#ifdef LOG
+#ifdef LOGPERF
   time_t start_sec, end_sec;
   uint16_t start_ms, end_ms;
   time_ms(&start_sec, &start_ms);
+#endif
+
+#ifdef LOG
+  APP_LOG(APP_LOG_LEVEL_INFO, "Time is %d:%d:%d", prv_tick_time->tm_hour, prv_tick_time->tm_min, prv_tick_time->tm_sec);
 #endif
 
   int minutes = prv_tick_time->tm_min;
@@ -848,9 +1035,9 @@ static void bg_update_proc(Layer *layer, GContext *ctx) {
       }
       else if (!is_in_bg1) {
         //if ((y * bounds.size.w + x) % 5 == 0) {
-          //color = bg_color1;
+        //color = bg_color1;
         //} else {
-          //color = bg_color2;
+        //color = bg_color2;
         //}
 #ifdef PBL_COLOR
         color = settings.BackgroundColor2;
@@ -864,7 +1051,7 @@ static void bg_update_proc(Layer *layer, GContext *ctx) {
   }
   graphics_release_frame_buffer(ctx, fb);
 
-#ifdef LOG
+#ifdef LOGPERF
   time_ms(&end_sec, &end_ms);
   int elapsed_ms = (int)((end_sec - start_sec) * 1000 + (end_ms - start_ms));
   APP_LOG(APP_LOG_LEVEL_INFO, "Time to update BG: %d ms", elapsed_ms);
@@ -872,15 +1059,29 @@ static void bg_update_proc(Layer *layer, GContext *ctx) {
 }
 
 static void draw_dial() {
-#ifdef LOG
-  APP_LOG(APP_LOG_LEVEL_INFO, "Drawing dial");
+#ifdef LOGPERF
+  time_t start_sec, end_sec;
+  uint16_t start_ms, end_ms;
+  time_ms(&start_sec, &start_ms);
 #endif
-  binary_image_mask_data_destroy(dial);
-  binary_image_mask_data_destroy(digits);
-  binary_image_mask_data_destroy(digits_big);
+
+  if (dial != NULL) {
+    binary_image_mask_data_destroy(dial);
+    dial = NULL;
+  }
+
+  if (digits != NULL) {
+    binary_image_mask_data_destroy(digits);
+    digits = NULL;
+  }
+  if (digits_big != NULL) {
+    binary_image_mask_data_destroy(digits_big);
+    digits_big = NULL;
+  }
 
   if (ds != NULL) {
     free(ds);
+    ds = NULL;
   }
   ds = get_dial_spec();
 
@@ -893,6 +1094,7 @@ static void draw_dial() {
       binary_image_mask_data_draw(dial, markers, ds->markers[i], GRect(0, ds->marker_size.h * i, ds->marker_size.w, ds->marker_size.h), true);
     }
     binary_image_mask_data_destroy(markers);
+    markers = NULL;
   }
   else {
     digits_big = binary_image_mask_data_create_from_resource(GSize(ds->digit_big_size.w * 10, ds->digit_big_size.h), ds->digit_big_res);
@@ -903,6 +1105,7 @@ static void draw_dial() {
     BinaryImageMaskData *logo = binary_image_mask_data_create_from_resource(ds->logo_size, ds->logo_res);
     binary_image_mask_data_draw(dial, logo, ds->logo, GRect(0, 0, ds->logo_size.w, ds->logo_size.h), true);
     binary_image_mask_data_destroy(logo);
+    logo = NULL;
   }
 
   // TODO: Setting to force model
@@ -945,12 +1148,14 @@ static void draw_dial() {
     }
     binary_image_mask_data_draw(dial, models, ds->model, GRect(0, ds->model_size.h * index, ds->model_size.w, ds->model_size.h), true);
     binary_image_mask_data_destroy(models);
+    models = NULL;
   }
 
   if (settings.EnableDate && !settings.DigitalWatch) {
     BinaryImageMaskData *date_box = binary_image_mask_data_create_from_resource(ds->date_box_size, ds->date_box_res);
     binary_image_mask_data_draw(dial, date_box, ds->date_box, GRect(0, 0, ds->date_box_size.w, ds->date_box_size.h), true);
     binary_image_mask_data_destroy(date_box);
+    date_box = NULL;
   }
 
   if (settings.EnableDate) {
@@ -965,22 +1170,30 @@ static void draw_dial() {
     BinaryImageMaskData *digital_box = binary_image_mask_data_create_from_resource(ds->digital_box_size, ds->digital_box_res);
     binary_image_mask_data_draw(dial, digital_box, ds->digital_box, GRect(0, 0, ds->digital_box_size.w, ds->digital_box_size.h), true);
     binary_image_mask_data_destroy(digital_box);
+    digital_box = NULL;
 
     BinaryImageMaskData *digital_colon = binary_image_mask_data_create_from_resource(ds->digital_colon_size, ds->digital_colon_res);
     binary_image_mask_data_draw(dial, digital_colon, ds->digital_colon, GRect(0, 0, ds->digital_colon_size.w, ds->digital_colon_size.h), true);
     binary_image_mask_data_destroy(digital_colon);
+    digital_colon = NULL;
 
-    update_digital_time(prv_tick_time);
+    update_digital_time();
   }
+
+#ifdef LOGPERF
+  time_ms(&end_sec, &end_ms);
+  int elapsed_ms = (int)((end_sec - start_sec) * 1000 + (end_ms - start_ms));
+  APP_LOG(APP_LOG_LEVEL_INFO, "Time to draw dial: %d ms", elapsed_ms);
+#endif
 }
 
 static void prv_window_load(Window *window) {
   time_t temp = time(NULL);
   prv_tick_time = localtime(&temp);
 #ifdef DATE
-      current_date = DATE;
+  current_date = DATE;
 #else
-      current_date = prv_tick_time->tm_mday;
+  current_date = prv_tick_time->tm_mday;
 #endif
 
 #ifdef DAY
@@ -993,18 +1206,19 @@ static void prv_window_load(Window *window) {
 
   draw_dial();
 
+  s_bg_layer = layer_create(bounds);
+  s_canvas_layer = layer_create(bounds);
+  layer_set_update_proc(s_canvas_layer, canvas_update_proc);
+  layer_set_update_proc(s_bg_layer, bg_update_proc);
+  layer_add_child(window_layer, s_bg_layer);
+  layer_add_child(window_layer, s_canvas_layer);
+
+  tick_timer_service_unsubscribe();
   if (settings.EnableSecondsHand && !settings.DigitalWatch) {
     tick_timer_service_subscribe(SECOND_UNIT, tick_handler);
   } else {
     tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
   }
-
-  s_bg_layer = layer_create(bounds);
-  s_canvas_layer = layer_create(bounds);
-  layer_add_child(window_layer, s_bg_layer);
-  layer_add_child(window_layer, s_canvas_layer);
-  layer_set_update_proc(s_canvas_layer, canvas_update_proc);
-  layer_set_update_proc(s_bg_layer, bg_update_proc);
 
   unobstructed_change_handler(100, NULL);
 
@@ -1017,11 +1231,25 @@ static void prv_window_load(Window *window) {
 
 static void prv_window_unload(Window *window) {
   layer_destroy(s_canvas_layer);
+  s_canvas_layer = NULL;
   layer_destroy(s_bg_layer);
-  binary_image_mask_data_destroy(dial);
-  binary_image_mask_data_destroy(digits);
-  binary_image_mask_data_destroy(digits_big);
-  free(ds);
+  s_bg_layer = NULL;
+  if (dial != NULL) {
+    binary_image_mask_data_destroy(dial);
+    dial = NULL;
+  }
+  if(digits != NULL) {
+    binary_image_mask_data_destroy(digits);
+    digits = NULL;
+  }
+  if (digits_big != NULL) {
+    binary_image_mask_data_destroy(digits_big);
+    digits_big = NULL;
+  }
+  if (ds != NULL) {
+    free(ds);
+    ds = NULL;
+  }
 }
 
 static void prv_init(void) {
@@ -1032,8 +1260,7 @@ static void prv_init(void) {
     .load = prv_window_load,
     .unload = prv_window_unload,
   });
-  const bool animated = true;
-  window_stack_push(s_window, animated);
+  window_stack_push(s_window, false);
 
   app_message_register_inbox_received(prv_inbox_received_handler);
   app_message_open(256, 0);
@@ -1041,15 +1268,11 @@ static void prv_init(void) {
 
 static void prv_deinit(void) {
   window_destroy(s_window);
+  s_window = NULL;
 }
 
 int main(void) {
   prv_init();
-
-#ifdef LOG
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Done initializing, pushed window: %p", s_window);
-#endif
-
   app_event_loop();
   prv_deinit();
 }
