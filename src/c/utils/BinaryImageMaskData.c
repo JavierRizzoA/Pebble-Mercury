@@ -19,8 +19,12 @@ struct BinaryImageMaskData* binary_image_mask_data_create(GSize size) {
 
 void binary_image_mask_data_destroy(BinaryImageMaskData* bimd) {
   if (bimd != NULL) {
-    free(bimd->data);
+    if (bimd->data != NULL) {
+      free(bimd->data);
+      bimd->data = NULL;
+    }
     free(bimd);
+    bimd = NULL;
   }
 }
 
