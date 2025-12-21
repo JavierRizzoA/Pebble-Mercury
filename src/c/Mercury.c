@@ -74,6 +74,7 @@ static bool byte_get_bit(uint8_t *byte, uint8_t bit);
 static void byte_set_bit(uint8_t *byte, uint8_t bit, uint8_t value);
 static void set_pixel_color(GBitmapDataRowInfo info, GPoint point, GColor color);
 static void set_marker_positions(DialSpec* ds);
+static void unobstructed_change_handler(AnimationProgress progress, void *context);
 
 static void prv_save_settings(void) {
   persist_write_data(SETTINGS_KEY, &settings, sizeof(settings));
@@ -286,6 +287,7 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
 
   prv_save_settings();
   draw_dial();
+  unobstructed_change_handler(100, NULL);
 
 #ifdef LOG
   APP_LOG(APP_LOG_LEVEL_DEBUG, "BG dirty because of inbox");
