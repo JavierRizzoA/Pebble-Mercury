@@ -12,6 +12,8 @@ void binary_image_mask_data_destroy(BinaryImageMaskData* bimd);
 
 struct BinaryImageMaskData* binary_image_mask_data_create_from_resource(GSize size, uint32_t resource_id);
 
+struct BinaryImageMaskData* binary_image_mask_data_create_from_resource_offset(GSize size, uint32_t resource_id, uint32_t offset);
+
 void binary_image_mask_data_set_bit(BinaryImageMaskData* bimd, int x, int y, bool val);
 
 void binary_image_mask_data_clear_region(BinaryImageMaskData* bimd, GRect region, bool centered);

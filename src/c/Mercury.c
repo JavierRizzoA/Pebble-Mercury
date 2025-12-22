@@ -1112,7 +1112,6 @@ static void draw_dial() {
 
   // TODO: Setting to force model
   if (settings.EnableWatchModel) {
-    BinaryImageMaskData *models = binary_image_mask_data_create_from_resource(GSize(ds->model_size.w, ds->model_size.h * MODEL_COUNT), ds->models_res);
     int index = 5;
     switch(watch_info_get_model()) {
       case WATCH_INFO_MODEL_PEBBLE_ORIGINAL:
@@ -1148,9 +1147,11 @@ static void draw_dial() {
         index = 8;
         break;
     }
-    binary_image_mask_data_draw(dial, models, ds->model, GRect(0, ds->model_size.h * index, ds->model_size.w, ds->model_size.h), true);
-    binary_image_mask_data_destroy(models);
-    models = NULL;
+
+    BinaryImageMaskData *model = binary_image_mask_data_create_from_resource_offset(GSize(ds->model_size.w, ds->model_size.h), ds->models_res, ds->model_size.h * index * ds->model_size.w);
+    binary_image_mask_data_draw(dial, model, ds->model, GRect(0, 0, ds->model_size.w, ds->model_size.h), true);
+    binary_image_mask_data_destroy(model);
+    model = NULL;
   }
 
   if (settings.EnableDate && !settings.DigitalWatch) {
