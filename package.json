@@ -1,7 +1,7 @@
 {
   "name": "mercury",
   "author": "Javier Rizzo",
-  "version": "1.13.0",
+  "version": "1.14.0",
   "keywords": [
     "pebble",
     "watchface",
@@ -66,6 +66,12 @@
     ],
     "resources": {
       "media": [
+        {
+          "type": "bitmap",
+          "name": "MENU_ICON",
+          "file": "icon.png",
+          "menuIcon": true
+        },
         {
           "type": "raw",
           "name": "LOGO",
