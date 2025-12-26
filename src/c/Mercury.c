@@ -83,6 +83,7 @@ static void prv_default_settings(void) {
   settings.EnableDate = true;
   settings.EnablePebbleLogo = true;
   settings.EnableWatchModel = true;
+  settings.ForcedWatchModel = -1;
   settings.EnableMoonphase = true;
 #ifdef SECONDS
   settings.EnableSecondsHand = SECONDS;
@@ -184,6 +185,7 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
   Tuple *enable_date_t = dict_find(iter, MESSAGE_KEY_EnableDate);
   Tuple *enable_pebble_logo_t = dict_find(iter, MESSAGE_KEY_EnablePebbleLogo);
   Tuple *enable_watch_model_t = dict_find(iter, MESSAGE_KEY_EnableWatchModel);
+  Tuple *forced_watch_model_t = dict_find(iter, MESSAGE_KEY_ForcedWatchModel);
   Tuple *enable_moonphase_t = dict_find(iter, MESSAGE_KEY_EnableMoonphase);
   Tuple *digital_watch_t = dict_find(iter, MESSAGE_KEY_DigitalWatch);
   Tuple *bg_color1_t = dict_find(iter, MESSAGE_KEY_BackgroundColor1);
@@ -221,6 +223,9 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
   }
   if(enable_watch_model_t) {
     settings.EnableWatchModel = enable_watch_model_t->value->int32 == 1;
+  }
+  if(enable_watch_model_t) {
+    settings.ForcedWatchModel = atoi(forced_watch_model_t->value->cstring);
   }
   if(enable_moonphase_t) {
     settings.EnableMoonphase = enable_moonphase_t->value->int32 == 1;
@@ -1108,50 +1113,53 @@ static void draw_dial() {
     logo = NULL;
   }
 
-  // TODO: Setting to force model
   if (settings.EnableWatchModel) {
     BinaryImageMaskData *models = binary_image_mask_data_create_from_resource(GSize(ds->model_size.w, ds->model_size.h * MODEL_COUNT), ds->models_res);
-    int index = 5;
-    switch(watch_info_get_model()) {
-      case WATCH_INFO_MODEL_PEBBLE_ORIGINAL:
-        index = 0;
-        break;
-      case WATCH_INFO_MODEL_PEBBLE_STEEL:
-        index = 1;
-        break;
-      case WATCH_INFO_MODEL_PEBBLE_TIME:
-        index = 2;
-        break;
-      case WATCH_INFO_MODEL_PEBBLE_TIME_STEEL:
-        index = 3;
-        break;
-      case WATCH_INFO_MODEL_PEBBLE_TIME_ROUND_14:
-      case WATCH_INFO_MODEL_PEBBLE_TIME_ROUND_20:
-        index = 4;
-        break;
-      case WATCH_INFO_MODEL_PEBBLE_2_HR:
-        index = 6;
-        break;
-      case WATCH_INFO_MODEL_PEBBLE_2_SE:
-        index = 7;
-        break;
-        // There's a bug in the SDK that requires this preprocessor condition
-        // https://discord.com/channels/221364737269694464/264746316477759489/1443423122517921844
+    int index = settings.ForcedWatchModel;
+
+    if (index == -1) {
+      switch(watch_info_get_model()) {
+        case WATCH_INFO_MODEL_PEBBLE_ORIGINAL:
+          index = 0;
+          break;
+        case WATCH_INFO_MODEL_PEBBLE_STEEL:
+          index = 1;
+          break;
+        case WATCH_INFO_MODEL_PEBBLE_TIME:
+          index = 2;
+          break;
+        case WATCH_INFO_MODEL_PEBBLE_TIME_STEEL:
+          index = 3;
+          break;
+        case WATCH_INFO_MODEL_PEBBLE_TIME_ROUND_14:
+        case WATCH_INFO_MODEL_PEBBLE_TIME_ROUND_20:
+          index = 4;
+          break;
+        case WATCH_INFO_MODEL_PEBBLE_2_HR:
+          index = 6;
+          break;
+        case WATCH_INFO_MODEL_PEBBLE_2_SE:
+          index = 7;
+          break;
+          // There's a bug in the SDK that requires this preprocessor condition
+          // https://discord.com/channels/221364737269694464/264746316477759489/1443423122517921844
 #ifndef PBL_PLATFORM_APLITE
-      case WATCH_INFO_MODEL_COREDEVICES_C2D:
-        index = 9;
-        break;
+        case WATCH_INFO_MODEL_COREDEVICES_C2D:
+          index = 9;
+          break;
 #endif
-      case WATCH_INFO_MODEL_PEBBLE_TIME_2:
+        case WATCH_INFO_MODEL_PEBBLE_TIME_2:
 #ifndef PBL_PLATFORM_APLITE
-      case WATCH_INFO_MODEL_COREDEVICES_CT2:
+        case WATCH_INFO_MODEL_COREDEVICES_CT2:
 #endif
-        index = 10;
-        break;
-      default:
-        index = 8;
-        break;
+          index = 10;
+          break;
+        default:
+          index = 8;
+          break;
+      }
     }
+
     binary_image_mask_data_draw(dial, models, ds->model, GRect(0, ds->model_size.h * index, ds->model_size.w, ds->model_size.h), true);
     binary_image_mask_data_destroy(models);
     models = NULL;

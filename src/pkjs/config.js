@@ -39,6 +39,62 @@ module.exports = [
         "defaultValue": true
       },
       {
+        "type": "select",
+        "label": "Watch Model",
+        "messageKey": "ForcedWatchModel",
+        "defaultValue": "-1",
+        "options": [
+          {
+            "label": "(Default: Autodetect watch model)",
+            "value": "-1"
+          },
+          {
+            "label": "Smartwatch",
+            "value": "8"
+          },
+          {
+            "label": "Classic",
+            "value": "0"
+          },
+          {
+            "label": "Classic Steel",
+            "value": "1"
+          },
+          {
+            "label": "Time",
+            "value": "2"
+          },
+          {
+            "label": "Time Steel",
+            "value": "3"
+          },
+          {
+            "label": "Time Round",
+            "value": "4"
+          },
+          {
+            "label": "2 HR",
+            "value": "6"
+          },
+          {
+            "label": "2 SE",
+            "value": "7"
+          },
+          {
+            "label": "2 Duo",
+            "value": "9"
+          },
+          {
+            "label": "Time 2",
+            "value": "10"
+          },
+          {
+            "label": "Unknown",
+            "value": "5"
+          }
+        ]
+      },
+      {
         "type": "toggle",
         "label": "Moonphase",
         "messageKey": "EnableMoonphase",

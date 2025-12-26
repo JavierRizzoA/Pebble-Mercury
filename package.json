@@ -44,6 +44,7 @@
       "EnableDate",
       "EnablePebbleLogo",
       "EnableWatchModel",
+      "ForcedWatchModel",
       "EnableMoonphase",
       "DigitalWatch",
       "BackgroundColor1",
