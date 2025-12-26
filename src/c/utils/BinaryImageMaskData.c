@@ -12,7 +12,7 @@ void binary_image_mask_data_draw(BinaryImageMaskData* dest, BinaryImageMaskData*
 struct BinaryImageMaskData* binary_image_mask_data_create(GSize size) {
   BinaryImageMaskData *bimd = (BinaryImageMaskData*) malloc(sizeof(BinaryImageMaskData));
   bimd->size = size;
-  bimd->data = (uint8_t*)malloc(size.w * size.h / 8.0 + 0.5);
+  bimd->data = (uint8_t*)malloc(size.w * size.h / 8.0 + 0.9);
   binary_image_mask_data_clear_region(bimd, GRect(0, 0, size.w, size.h), false);
   return bimd;
 }
@@ -31,7 +31,7 @@ void binary_image_mask_data_destroy(BinaryImageMaskData* bimd) {
 struct BinaryImageMaskData* binary_image_mask_data_create_from_resource(GSize size, uint32_t resource_id) {
   BinaryImageMaskData *bimd = binary_image_mask_data_create(size);
   ResHandle handle = resource_get_handle(resource_id);
-  resource_load(handle, bimd->data, bimd->size.w * bimd->size.h / 8.0 + 0.5);
+  resource_load(handle, bimd->data, bimd->size.w * bimd->size.h / 8.0 + 0.9);
   return bimd;
 }
 
