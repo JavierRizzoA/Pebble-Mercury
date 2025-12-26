@@ -1,7 +1,7 @@
 {
   "name": "mercury",
   "author": "Javier Rizzo",
-  "version": "1.12.0",
+  "version": "1.13.0",
   "keywords": [
     "pebble",
     "watchface",
@@ -44,6 +44,7 @@
       "EnableDate",
       "EnablePebbleLogo",
       "EnableWatchModel",
+      "ForcedWatchModel",
       "EnableMoonphase",
       "DigitalWatch",
       "BackgroundColor1",
