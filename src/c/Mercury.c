@@ -58,6 +58,7 @@ static void update_digital_time();
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed);
 static void draw_fancy_hand(GContext *ctx, int angle, int length, GColor fill_color, GColor border_color);
 static void draw_line_hand(GContext *ctx, int angle, int length, int back_length, GColor color);
+static void draw_line_hand_with_border(GContext *ctx, int angle, int length, int back_length, GColor color, GColor border_color);
 static void draw_center(GContext *ctx, GColor minutes_border, GColor minutes_color, GColor seconds_color);
 static void canvas_update_proc(Layer *layer, GContext *ctx);
 static void bg_update_proc(Layer *layer, GContext *ctx);
@@ -161,6 +162,36 @@ static void prv_default_settings(void) {
 #else
   settings.BWTextColor2 = GColorWhite;
 #endif
+#ifdef BWHHC
+  settings.BWHoursHandColor = BWHHC;
+#else
+  settings.BWHoursHandColor = GColorWhite;
+#endif
+#ifdef BWHHBC
+  settings.BWHoursHandBorderColor = BWHHBC;
+#else
+  settings.BWHoursHandBorderColor = GColorBlack;
+#endif
+#ifdef BWMHC
+  settings.BWMinutesHandColor = BWMHC;
+#else
+  settings.BWMinutesHandColor = GColorWhite;
+#endif
+#ifdef BWMHBC
+  settings.BWMinutesHandBorderColor = BWMHBC;
+#else
+  settings.BWMinutesHandBorderColor = GColorBlack;
+#endif
+#ifdef BWSHC
+  settings.BWSecondsHandColor = BWSHC;
+#else
+  settings.BWSecondsHandColor = GColorWhite;
+#endif
+#ifdef BWSHBC
+  settings.BWSecondsHandBorderColor = BWSHBC;
+#else
+  settings.BWSecondsHandBorderColor = GColorBlack;
+#endif
 #ifdef FONT
   settings.Font = FONT;
 #else
@@ -202,6 +233,12 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
   Tuple *bwbg_color2_t = dict_find(iter, MESSAGE_KEY_BWBackgroundColor2);
   Tuple *bwtext_color1_t = dict_find(iter, MESSAGE_KEY_BWTextColor1);
   Tuple *bwtext_color2_t = dict_find(iter, MESSAGE_KEY_BWTextColor2);
+  Tuple *bwhours_color_t = dict_find(iter, MESSAGE_KEY_BWHoursHandColor);
+  Tuple *bwhours_border_t = dict_find(iter, MESSAGE_KEY_BWHoursHandBorderColor);
+  Tuple *bwminutes_color_t = dict_find(iter, MESSAGE_KEY_BWMinutesHandColor);
+  Tuple *bwminutes_border_t = dict_find(iter, MESSAGE_KEY_BWMinutesHandBorderColor);
+  Tuple *bwseconds_color_t = dict_find(iter, MESSAGE_KEY_BWSecondsHandColor);
+  Tuple *bwseconds_border_t = dict_find(iter, MESSAGE_KEY_BWSecondsHandBorderColor);
   Tuple *font_t = dict_find(iter, MESSAGE_KEY_Font);
   Tuple *fixed_angle_t = dict_find(iter, MESSAGE_KEY_FixedAngle);
   Tuple *angle_t = dict_find(iter, MESSAGE_KEY_Angle);
@@ -279,6 +316,24 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
   }
   if (bwtext_color2_t) {
     settings.BWTextColor2 = GColorFromHEX(bwtext_color2_t->value->int32);
+  }
+  if (bwhours_color_t) {
+    settings.BWHoursHandColor = GColorFromHEX(bwhours_color_t->value->int32);
+  }
+  if (bwhours_border_t) {
+    settings.BWHoursHandBorderColor = GColorFromHEX(bwhours_border_t->value->int32);
+  }
+  if (bwminutes_color_t) {
+    settings.BWMinutesHandColor = GColorFromHEX(bwminutes_color_t->value->int32);
+  }
+  if (bwminutes_border_t) {
+    settings.BWMinutesHandBorderColor = GColorFromHEX(bwminutes_border_t->value->int32);
+  }
+  if (bwseconds_color_t) {
+    settings.BWSecondsHandColor = GColorFromHEX(bwseconds_color_t->value->int32);
+  }
+  if (bwseconds_border_t) {
+    settings.BWSecondsHandBorderColor = GColorFromHEX(bwseconds_border_t->value->int32);
   }
   if (font_t) {
     settings.Font = font_t->value->int32;
@@ -814,17 +869,40 @@ static void draw_line_hand(GContext *ctx, int angle, int length, int back_length
   GPoint p1 = polar_to_point_offset(origin, angle + 180, back_length);
   GPoint p2 = polar_to_point_offset(origin, angle, length);
   graphics_context_set_antialiased(ctx, false);
+
   graphics_context_set_fill_color(ctx, color);
   graphics_context_set_stroke_color(ctx, color);
   graphics_context_set_stroke_width(ctx, 3);
   graphics_draw_line(ctx, p1, p2);
 
-#ifdef PBL_BW
-  graphics_context_set_fill_color(ctx, GColorWhite);
-  graphics_context_set_stroke_color(ctx, GColorWhite);
+#ifdef LOGPERF
+  time_ms(&end_sec, &end_ms);
+  int elapsed_ms = (int)((end_sec - start_sec) * 1000 + (end_ms - start_ms));
+  APP_LOG(APP_LOG_LEVEL_INFO, "Time to draw line hand: %d ms", elapsed_ms);
+#endif
+}
+
+static void draw_line_hand_with_border(GContext *ctx, int angle, int length, int back_length, GColor color, GColor border_color) {
+#ifdef LOGPERF
+  time_t start_sec, end_sec;
+  uint16_t start_ms, end_ms;
+  time_ms(&start_sec, &start_ms);
+#endif
+
+  GPoint origin = GPoint(bounds.size.w / 2, bounds.size.h / 2);
+  GPoint p1 = polar_to_point_offset(origin, angle + 180, back_length);
+  GPoint p2 = polar_to_point_offset(origin, angle, length);
+  graphics_context_set_antialiased(ctx, false);
+
+  graphics_context_set_fill_color(ctx, border_color);
+  graphics_context_set_stroke_color(ctx, border_color);
+  graphics_context_set_stroke_width(ctx, 3);
+  graphics_draw_line(ctx, p1, p2);
+
+  graphics_context_set_fill_color(ctx, color);
+  graphics_context_set_stroke_color(ctx, color);
   graphics_context_set_stroke_width(ctx, 1);
   graphics_draw_line(ctx, p1, p2);
-#endif
 
 #ifdef LOGPERF
   time_ms(&end_sec, &end_ms);
@@ -894,7 +972,7 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
 #ifdef PBL_COLOR
     draw_fancy_hand(ctx, minutes_angle, bounds.size.w / 2 - 10, settings.MinutesHandColor, settings.MinutesHandBorderColor);
 #else
-    draw_fancy_hand(ctx, minutes_angle, bounds.size.w / 2 - 10, GColorWhite, GColorBlack);
+    draw_fancy_hand(ctx, minutes_angle, bounds.size.w / 2 - 10, settings.BWMinutesHandColor, settings.BWMinutesHandBorderColor);
 #endif
 
     int hours_angle = ((float)hours / 12 * 360) + ((float)minutes / 60 * 360 / 12) + ((float)seconds / 60 * 360 / 60 / 12)  - 90;
@@ -902,7 +980,7 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
 #ifdef PBL_COLOR
     draw_fancy_hand(ctx, hours_angle, bounds.size.w / 2 - 30, settings.HoursHandColor, settings.HoursHandBorderColor);
 #else
-    draw_fancy_hand(ctx, hours_angle, bounds.size.w / 2 - 30, GColorWhite, GColorBlack);
+    draw_fancy_hand(ctx, hours_angle, bounds.size.w / 2 - 30, settings.BWHoursHandColor, settings.BWHoursHandBorderColor);
 #endif
 
     if (settings.EnableSecondsHand) {
@@ -910,14 +988,14 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
 #ifdef PBL_COLOR
       draw_line_hand(ctx, seconds_angle, bounds.size.w / 2 - 5, 15, settings.SecondsHandColor);
 #else
-      draw_line_hand(ctx, seconds_angle, bounds.size.w / 2 - 5, 15, GColorBlack);
+      draw_line_hand_with_border(ctx, seconds_angle, bounds.size.w / 2 - 5, 15, settings.BWSecondsHandColor, settings.BWSecondsHandBorderColor);
 #endif
     }
 
 #ifdef PBL_COLOR
     draw_center(ctx, settings.HoursHandBorderColor, settings.HoursHandColor, settings.SecondsHandColor);
 #else
-    draw_center(ctx, GColorBlack, GColorWhite, GColorBlack);
+    draw_center(ctx, settings.BWHoursHandBorderColor, settings.BWHoursHandColor, settings.BWSecondsHandBorderColor);
 #endif
   }
 

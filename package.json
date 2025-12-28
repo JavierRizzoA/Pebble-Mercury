@@ -1,7 +1,7 @@
 {
   "name": "mercury",
   "author": "Javier Rizzo",
-  "version": "1.14.0",
+  "version": "1.15.0",
   "keywords": [
     "pebble",
     "watchface",
@@ -60,6 +60,12 @@
       "BWBackgroundColor2",
       "BWTextColor1",
       "BWTextColor2",
+      "BWHoursHandColor",
+      "BWHoursHandBorderColor",
+      "BWMinutesHandColor",
+      "BWMinutesHandBorderColor",
+      "BWSecondsHandColor",
+      "BWSecondsHandBorderColor",
       "Font",
       "FixedAngle",
       "Angle"

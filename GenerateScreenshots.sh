@@ -41,7 +41,7 @@ screenshot basalt basalt3
 screenshot chalk chalk3
 screenshot emery emery3
 
-build "-DHOUR=22 -DMINUTE=4 -DSECOND=30 -DDAY=6 -DMOONPHASE=3 -DDATE=6 -DFONT=3 -DBGC1=GColorBlack -DBGC2=GColorBlack -DTC1=GColorWhite -DTC2=GColorWhite -DHHC=GColorBlack -DMHC=GColorBlack -DHHBC=GColorWhite -DMHBC=GColorWhite -DSHC=GColorWhite -DBWBGC1=GColorBlack -DBWTC1=GColorWhite"
+build "-DHOUR=22 -DMINUTE=4 -DSECOND=30 -DDAY=6 -DMOONPHASE=3 -DDATE=6 -DFONT=3 -DBGC1=GColorBlack -DBGC2=GColorBlack -DTC1=GColorWhite -DTC2=GColorWhite -DHHC=GColorBlack -DMHC=GColorBlack -DHHBC=GColorWhite -DMHBC=GColorWhite -DSHC=GColorWhite -DBWBGC1=GColorBlack -DBWTC1=GColorWhite -DBWHHC=GColorBlack -DBWMHC=GColorBlack -DBWHHBC=GColorWhite -DBWMHBC=GColorWhite -DBWSHC=GColorWhite -DBWSHBC=GColorWhite"
 screenshot diorite diorite4
 screenshot basalt basalt4
 screenshot chalk chalk4

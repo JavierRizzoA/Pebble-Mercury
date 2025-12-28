@@ -68,4 +68,10 @@ typedef struct ClaySettings {
   GColor BWBackgroundColor2;
   GColor BWTextColor1;
   GColor BWTextColor2;
+  GColor BWHoursHandColor;
+  GColor BWHoursHandBorderColor;
+  GColor BWMinutesHandColor;
+  GColor BWMinutesHandBorderColor;
+  GColor BWSecondsHandColor;
+  GColor BWSecondsHandBorderColor;
 } __attribute__((__packed__)) ClaySettings;
