@@ -437,10 +437,15 @@ DialSpec* get_dial_spec() {
 
   // Common resource settings
   ds->logo_res = RESOURCE_ID_LOGO;
-  ds->logo_size = GSize(38, 12);
-  ds->logo = GPoint(half_screen_width, bounds.size.h * 0.19 + ds->logo_size.h / 2);
   ds->models_res = RESOURCE_ID_MODELS;
-  ds->model_size = GSize(71, 5);
+  if (!is_large_screen()) {
+    ds->logo_size = GSize(38, 12);
+    ds->model_size = GSize(71, 5);
+  } else {
+    ds->logo_size = GSize(60, 16);
+    ds->model_size = GSize(83, 6);
+  }
+  ds->logo = GPoint(half_screen_width, bounds.size.h * 0.19 + ds->logo_size.h / 2);
   ds->model = GPoint(half_screen_width, bounds.size.h * 0.19 + ds->logo_size.h + 1 + ds->model_size.h / 2);
   ds->day_res = RESOURCE_ID_DAYS;
   ds->day_size = GSize(30, 10);
@@ -459,11 +464,17 @@ DialSpec* get_dial_spec() {
     ds->marker_size = GSize(22, 19);
 
     ds->digital_box_res = RESOURCE_ID_DIGITAL_BOX1;
-    ds->digital_box_size = GSize(116, 45);
     ds->digital_colon_res = RESOURCE_ID_DIGITAL_COLON1;
-    ds->digital_colon_size = GSize(4, 20);
     ds->digit_big_res = RESOURCE_ID_DIGITS_BIG1;
-    ds->digit_big_size = GSize(20, 28);
+    if (!is_large_screen()) {
+      ds->digital_box_size = GSize(116, 45);
+      ds->digit_big_size = GSize(20, 28);
+      ds->digital_colon_size = GSize(4, 20);
+    } else {
+      ds->digital_box_size = GSize(166, 63);
+      ds->digit_big_size = GSize(28, 40);
+      ds->digital_colon_size = GSize(6, 28);
+    }
   } else if (get_font() == 2) {
     ds->date_box_res = RESOURCE_ID_DATE_BOX2;
     ds->date_box_size = GSize(30, 18);
@@ -473,11 +484,17 @@ DialSpec* get_dial_spec() {
     ds->marker_size = GSize(22, 15);
 
     ds->digital_box_res = RESOURCE_ID_DIGITAL_BOX2;
-    ds->digital_box_size = GSize(108, 36);
     ds->digital_colon_res = RESOURCE_ID_DIGITAL_COLON2;
-    ds->digital_colon_size = GSize(2, 12);
     ds->digit_big_res = RESOURCE_ID_DIGITS_BIG2;
-    ds->digit_big_size = GSize(20, 20);
+    if (!is_large_screen()) {
+      ds->digital_box_size = GSize(108, 36);
+      ds->digit_big_size = GSize(20, 20);
+      ds->digital_colon_size = GSize(2, 12);
+    } else {
+      ds->digital_box_size = GSize(150, 50);
+      ds->digit_big_size = GSize(28, 28);
+      ds->digital_colon_size = GSize(3, 17);
+    }
   } else {
     ds->date_box_res = RESOURCE_ID_DATE_BOX3;
     ds->date_box_size = GSize(30, 17);
@@ -487,11 +504,17 @@ DialSpec* get_dial_spec() {
     ds->marker_size = GSize(26, 16);
 
     ds->digital_box_res = RESOURCE_ID_DIGITAL_BOX3;
-    ds->digital_box_size = GSize(108, 34);
     ds->digital_colon_res = RESOURCE_ID_DIGITAL_COLON3;
-    ds->digital_colon_size = GSize(2, 14);
     ds->digit_big_res = RESOURCE_ID_DIGITS_BIG3;
-    ds->digit_big_size = GSize(20, 22);
+    if (!is_large_screen()) {
+      ds->digital_box_size = GSize(108, 34);
+      ds->digit_big_size = GSize(20, 22);
+      ds->digital_colon_size = GSize(2, 14);
+    } else {
+      ds->digital_box_size = GSize(152, 48);
+      ds->digit_big_size = GSize(28, 31);
+      ds->digital_colon_size = GSize(3, 20);
+    }
   }
 
   // Calculate positions for markers.
