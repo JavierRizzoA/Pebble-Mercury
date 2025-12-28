@@ -245,6 +245,42 @@ module.exports = [
         "label": "Text Color 2",
         "messageKey": "BWTextColor2",
         "defaultValue": "FFFFFF"
+      },
+      {
+        "type": "color",
+        "label": "Hours Hand Color",
+        "messageKey": "BWHoursHandColor",
+        "defaultValue": "FFFFFF"
+      },
+      {
+        "type": "color",
+        "label": "Hours Hand Border Color",
+        "messageKey": "BWHoursHandBorderColor",
+        "defaultValue": "000000"
+      },
+      {
+        "type": "color",
+        "label": "Minutes Hand Color",
+        "messageKey": "BWMinutesHandColor",
+        "defaultValue": "FFFFFF"
+      },
+      {
+        "type": "color",
+        "label": "Minutes Hand Border Color",
+        "messageKey": "BWMinutesHandBorderColor",
+        "defaultValue": "000000"
+      },
+      {
+        "type": "color",
+        "label": "Seconds Hand Color",
+        "messageKey": "BWSecondsHandColor",
+        "defaultValue": "FFFFFF"
+      },
+      {
+        "type": "color",
+        "label": "Seconds Hand Border Color",
+        "messageKey": "BWSecondsHandBorderColor",
+        "defaultValue": "000000"
       }
     ]
   },
