@@ -76,6 +76,8 @@ static void byte_set_bit(uint8_t *byte, uint8_t bit, uint8_t value);
 static void set_pixel_color(GBitmapDataRowInfo info, GPoint point, GColor color);
 static void set_marker_positions(DialSpec* ds);
 static void unobstructed_change_handler(AnimationProgress progress, void *context);
+static GColor flip_color_bw(GColor color);
+static GColor handle_background_pattern(int x, int y, bool is_in_bg1);
 
 static void prv_save_settings(void) {
   persist_write_data(SETTINGS_KEY, &settings, sizeof(settings));
@@ -199,6 +201,32 @@ static void prv_default_settings(void) {
 #endif
   settings.FixedAngle = false;
   settings.Angle = 40;
+
+#ifdef BP1
+  settings.BackgroundPattern1 = BP1;
+#else
+  settings.BackgroundPattern1 = SOLID;
+#endif
+#ifdef BP2
+  settings.BackgroundPattern2 = BP2;
+#else
+  settings.BackgroundPattern2 = SOLID;
+#endif
+#ifdef SBGC1
+  settings.SecondaryBackgroundColor1 = SBGC1;
+#else
+  settings.SecondaryBackgroundColor1 = GColorWhite;
+#endif
+#ifdef SBGC2
+  settings.SecondaryBackgroundColor2 = SBGC2;
+#else
+  settings.SecondaryBackgroundColor2 = GColorOrange;
+#endif
+#ifdef NPUT
+  settings.NoPatternUnderText = NPUT;
+#else
+  settings.NoPatternUnderText = false;
+#endif
 }
 
 static void prv_load_settings(void) {
@@ -242,8 +270,13 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
   Tuple *font_t = dict_find(iter, MESSAGE_KEY_Font);
   Tuple *fixed_angle_t = dict_find(iter, MESSAGE_KEY_FixedAngle);
   Tuple *angle_t = dict_find(iter, MESSAGE_KEY_Angle);
+  Tuple *bg_pattern1_t = dict_find(iter, MESSAGE_KEY_BackgroundPattern1);
+  Tuple *bg_pattern2_t = dict_find(iter, MESSAGE_KEY_BackgroundPattern2);
+  Tuple *secondary_bg_color1_t = dict_find(iter, MESSAGE_KEY_SecondaryBackgroundColor1);
+  Tuple *secondary_bg_color2_t = dict_find(iter, MESSAGE_KEY_SecondaryBackgroundColor2);
+  Tuple *no_pattern_under_text_t = dict_find(iter, MESSAGE_KEY_NoPatternUnderText);
 
-  if(enable_seconds_t) {
+  if (enable_seconds_t) {
     settings.EnableSecondsHand = enable_seconds_t->value->int32 == 1;
 
     tick_timer_service_unsubscribe();
@@ -253,22 +286,22 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
       tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
     }
   }
-  if(enable_date_t) {
+  if (enable_date_t) {
     settings.EnableDate = enable_date_t->value->int32 == 1;
   }
-  if(enable_pebble_logo_t) {
+  if (enable_pebble_logo_t) {
     settings.EnablePebbleLogo = enable_pebble_logo_t->value->int32 == 1;
   }
-  if(enable_watch_model_t) {
+  if (enable_watch_model_t) {
     settings.EnableWatchModel = enable_watch_model_t->value->int32 == 1;
   }
-  if(enable_watch_model_t) {
+  if (forced_watch_model_t) {
     settings.ForcedWatchModel = atoi(forced_watch_model_t->value->cstring);
   }
-  if(enable_moonphase_t) {
+  if (enable_moonphase_t) {
     settings.EnableMoonphase = enable_moonphase_t->value->int32 == 1;
   }
-  if(digital_watch_t) {
+  if (digital_watch_t) {
     settings.DigitalWatch = digital_watch_t->value->int32 == 1;
 
     tick_timer_service_unsubscribe();
@@ -344,6 +377,21 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
   if (angle_t) {
     settings.Angle = angle_t->value->int32;
   }
+  if (bg_pattern1_t) {
+    settings.BackgroundPattern1 = atoi(bg_pattern1_t->value->cstring);
+  }
+  if (bg_pattern2_t) {
+    settings.BackgroundPattern2 = atoi(bg_pattern2_t->value->cstring);
+  }
+  if (secondary_bg_color1_t) {
+    settings.SecondaryBackgroundColor1 = GColorFromHEX(secondary_bg_color1_t->value->int32);
+  }
+  if (secondary_bg_color2_t) {
+    settings.SecondaryBackgroundColor2 = GColorFromHEX(secondary_bg_color2_t->value->int32);
+  }
+  if (no_pattern_under_text_t) {
+    settings.NoPatternUnderText = no_pattern_under_text_t->value->int32 == 1;
+  }
 
   prv_save_settings();
   draw_dial();
@@ -390,8 +438,7 @@ static void set_marker_positions(DialSpec* ds) {
     if (is_round()) {
       x = half_screen_width * cosine(angle);
       y = half_screen_height * sine(angle);
-    }
-    else {
+    } else {
       if ((float)(half_screen_width) * tangent(angle) <= (float)(half_screen_height)) {
         x = half_screen_width;
         y = (half_screen_width) * tangent(angle);
@@ -1026,6 +1073,81 @@ static void set_pixel_color(GBitmapDataRowInfo info, GPoint point, GColor color)
 #endif
 }
 
+static GColor flip_color_bw(GColor color) {
+  if (color.argb == 0xFF) {
+    return GColorBlack;
+  }
+  return GColorWhite;
+}
+
+static GColor handle_background_pattern(int x, int y, bool is_in_bg1) {
+  enum BackgroundPattern pattern = (is_in_bg1) ? settings.BackgroundPattern1 : settings.BackgroundPattern2;
+#ifdef PBL_COLOR
+  GColor color1 = (is_in_bg1) ? settings.BackgroundColor1 : settings.BackgroundColor2;
+  GColor color2 = (is_in_bg1) ? settings.SecondaryBackgroundColor1 : settings.SecondaryBackgroundColor2;
+#else
+  GColor color1 = (is_in_bg1) ? settings.BWBackgroundColor1 : settings.BWBackgroundColor2;
+  GColor color2 = (is_in_bg1) ? flip_color_bw(settings.BWBackgroundColor1) : flip_color_bw(settings.BWBackgroundColor2);
+#endif
+
+  GColor color = color1;
+
+  if (pattern != SOLID && (!settings.NoPatternUnderText || !binary_image_mask_data_is_filled_or_adjacent(dial, x, y, 1))) {
+    switch (pattern) {
+      case DITHER_STRONG:
+        if (y % 2 == 0 && (((y % 4) + x) % 4) == 0) {
+          color = color2;
+        }
+        break;
+      case DITHER_LIGHT:
+        if ((y * bounds.size.w + x) % 23 == 0) {
+          color = color2;
+        }
+        break;
+      case VERTICAL_STRONG:
+        if (x % 4 == 0) {
+          color = color2;
+        }
+        break;
+      case VERTICAL_LIGHT:
+        if (x % 6 == 0) {
+          color = color2;
+        }
+        break;
+      case HORIZONTAL_STRONG:
+        if (y % 4 == 0) {
+          color = color2;
+        }
+        break;
+      case HORIZONTAL_LIGHT:
+        if (y % 6 == 0) {
+          color = color2;
+        }
+        break;
+      case DIAGONAL:
+        if ((y + x) % 6 == 0) {
+          color = color2;
+        }
+        break;
+      case DIAGONAL_MIRROR:
+        if ((bounds.size.w -y + x) % 6 == 0) {
+          color = color2;
+        }
+        break;
+      case CHECKERBOARD:
+        if (((y / 10) % 2 == 0 && (x / 10) % 2 == 0)
+            || ((y / 10) % 2 == 1 && (x / 10) % 2 == 1)) {
+          color = color2;
+        }
+        break;
+      case SOLID:
+      default:
+        break;
+    }
+  }
+
+  return color;
+}
 
 static void bg_update_proc(Layer *layer, GContext *ctx) {
 #ifdef LOGPERF
@@ -1103,32 +1225,14 @@ static void bg_update_proc(Layer *layer, GContext *ctx) {
 #else
         color = settings.BWTextColor1;
 #endif
-      }
-      else if (!is_in_bg1 && is_in_dial) {
+      } else if (!is_in_bg1 && is_in_dial) {
 #ifdef PBL_COLOR
         color = settings.TextColor2;
 #else
         color = settings.BWTextColor2;
 #endif
-      }
-      else if (is_in_bg1) {
-#ifdef PBL_COLOR
-        color = settings.BackgroundColor1;
-#else
-        color = settings.BWBackgroundColor1;
-#endif
-      }
-      else if (!is_in_bg1) {
-        //if ((y * bounds.size.w + x) % 5 == 0) {
-        //color = bg_color1;
-        //} else {
-        //color = bg_color2;
-        //}
-#ifdef PBL_COLOR
-        color = settings.BackgroundColor2;
-#else
-        color = settings.BWBackgroundColor2;
-#endif
+      } else {
+        color = handle_background_pattern(x, y, is_in_bg1);
       }
 
       set_pixel_color(info, GPoint(x, y), color);
@@ -1180,8 +1284,7 @@ static void draw_dial() {
     }
     binary_image_mask_data_destroy(markers);
     markers = NULL;
-  }
-  else {
+  } else {
     digits_big = binary_image_mask_data_create_from_resource(GSize(ds->digit_big_size.w * 10, ds->digit_big_size.h), ds->digit_big_res);
   }
 
@@ -1332,7 +1435,7 @@ static void prv_window_unload(Window *window) {
     binary_image_mask_data_destroy(dial);
     dial = NULL;
   }
-  if(digits != NULL) {
+  if (digits != NULL) {
     binary_image_mask_data_destroy(digits);
     digits = NULL;
   }

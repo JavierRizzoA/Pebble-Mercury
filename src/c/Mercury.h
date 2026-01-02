@@ -4,6 +4,25 @@
 #define MODEL_COUNT 11
 #define SETTINGS_KEY 1
 
+enum BackgroundPattern {
+  SOLID = 0,
+  DITHER_STRONG = 1,
+  DITHER_LIGHT = 2,
+  VERTICAL_STRONG = 3,
+  VERTICAL_LIGHT = 4,
+  HORIZONTAL_STRONG = 5,
+  HORIZONTAL_LIGHT = 6,
+  DIAGONAL = 7,
+  DIAGONAL_MIRROR = 8,
+  CHECKERBOARD=9
+};
+
+typedef struct DrawnArea {
+  struct DrawnArea *next;
+  GPoint p1;
+  GPoint p2;
+} DrawnArea;
+
 typedef struct DialSpec {
   GPoint markers[12];
   GPoint logo;
@@ -56,7 +75,12 @@ typedef struct ClaySettings {
   bool FixedAngle;
   int Angle;
   GColor BackgroundColor1;
+  GColor SecondaryBackgroundColor1;
   GColor BackgroundColor2;
+  GColor SecondaryBackgroundColor2;
+  bool NoPatternUnderText;
+  enum BackgroundPattern BackgroundPattern1;
+  enum BackgroundPattern BackgroundPattern2;
   GColor TextColor1;
   GColor TextColor2;
   GColor HoursHandColor;

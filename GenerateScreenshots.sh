@@ -12,7 +12,7 @@ function screenshot() {
     pebble emu-set-timeline-quick-view --emulator "$1" on
   fi
 
-  #sleep 2
+  sleep 2
 
   pebble screenshot --emulator "$1" ./img/screenshots/"$2".png
 
@@ -35,11 +35,12 @@ screenshot basalt basalt2
 screenshot chalk chalk2
 screenshot emery emery2
 
-build "-DHOUR=22 -DMINUTE=4 -DSECOND=30 -DDAY=6 -DMOONPHASE=3 -DDATE=6 -DFONT=2 -DBGC1=GColorRed -DHHC=GColorOrange -DMHC=GColorOrange"
-screenshot diorite diorite3
+build "-DHOUR=22 -DMINUTE=4 -DSECOND=30 -DDAY=6 -DMOONPHASE=3 -DDATE=6 -DFONT=2 -DBGC1=GColorRed -DSBGC1=GColorRajah -DSBGC2=GColorRajah -DHHC=GColorOrange -DMHC=GColorOrange -DBP1=DITHER_STRONG -DBP2=DIAGONAL_MIRROR"
 screenshot basalt basalt3
 screenshot chalk chalk3
 screenshot emery emery3
+build "-DHOUR=22 -DMINUTE=4 -DSECOND=30 -DDAY=6 -DMOONPHASE=3 -DDATE=6 -DFONT=2 -DBGC1=GColorRed -DHHC=GColorOrange -DMHC=GColorOrange -DBP1=DITHER_STRONG -DBP2=DIAGONAL_MIRROR -DNPUT=true"
+screenshot diorite diorite3
 
 build "-DHOUR=22 -DMINUTE=4 -DSECOND=30 -DDAY=6 -DMOONPHASE=3 -DDATE=6 -DFONT=3 -DBGC1=GColorBlack -DBGC2=GColorBlack -DTC1=GColorWhite -DTC2=GColorWhite -DHHC=GColorBlack -DMHC=GColorBlack -DHHBC=GColorWhite -DMHBC=GColorWhite -DSHC=GColorWhite -DBWBGC1=GColorBlack -DBWTC1=GColorWhite -DBWHHC=GColorBlack -DBWMHC=GColorBlack -DBWHHBC=GColorWhite -DBWMHBC=GColorWhite -DBWSHC=GColorWhite -DBWSHBC=GColorWhite"
 screenshot diorite diorite4

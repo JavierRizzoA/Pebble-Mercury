@@ -19,3 +19,5 @@ void binary_image_mask_data_clear_region(BinaryImageMaskData* bimd, GRect region
 bool binary_image_mask_data_get_pixel(BinaryImageMaskData* bimd, int x, int y);
 
 void binary_image_mask_data_draw(BinaryImageMaskData* dest, BinaryImageMaskData* src, GPoint dest_pos, GRect src_reg, bool centered);
+
+bool binary_image_mask_data_is_filled_or_adjacent(BinaryImageMaskData* bimd, int x, int y, int margin);

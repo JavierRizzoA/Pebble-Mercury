@@ -1,7 +1,7 @@
 {
   "name": "mercury",
   "author": "Javier Rizzo",
-  "version": "1.15.0",
+  "version": "1.16.0",
   "keywords": [
     "pebble",
     "watchface",
@@ -49,8 +49,13 @@
       "DigitalWatch",
       "BackgroundColor1",
       "BackgroundColor2",
+      "BackgroundPattern1",
+      "BackgroundPattern2",
+      "SecondaryBackgroundColor1",
+      "SecondaryBackgroundColor2",
       "TextColor1",
       "TextColor2",
+      "NoPatternUnderText",
       "HoursHandColor",
       "HoursHandBorderColor",
       "MinutesHandColor",

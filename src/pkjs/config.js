@@ -152,133 +152,258 @@ module.exports = [
   },
   {
     "type": "section",
-    "capabilities": [ "COLOR" ],
     "items": [
       {
         "type": "heading",
-        "defaultValue": "Colors"
+        "defaultValue": "Colors & Patterns"
+      },
+      {
+        "type": "select",
+        "label": "Background Pattern 1",
+        "messageKey": "BackgroundPattern1",
+        "defaultValue": "0",
+        "options": [
+          {
+            "label": "Solid",
+            "value": "0"
+          },
+          {
+            "label": "Heavy Dither",
+            "value": "1"
+          },
+          {
+            "label": "Light Dither",
+            "value": "2"
+          },
+          {
+            "label": "Heavy Vertical",
+            "value": "3"
+          },
+          {
+            "label": "Light Vertical",
+            "value": "4"
+          },
+          {
+            "label": "Heavy Horizontal",
+            "value": "5"
+          },
+          {
+            "label": "Light Horizontal",
+            "value": "6"
+          },
+          {
+            "label": "Diagonal",
+            "value": "7"
+          },
+          {
+            "label": "Diagonal Mirror",
+            "value": "8"
+          },
+          {
+            "label": "Checkerboard",
+            "value": "9"
+          }
+        ]
       },
       {
         "type": "color",
         "label": "Background Color 1",
+        "capabilities": [ "COLOR" ],
         "messageKey": "BackgroundColor1",
         "defaultValue": "0055AA"
       },
       {
         "type": "color",
-        "label": "Background Color 2",
-        "messageKey": "BackgroundColor2",
-        "defaultValue": "FFFFAA"
-      },
-      {
-        "type": "color",
-        "label": "Text Color 1",
-        "messageKey": "TextColor1",
-        "defaultValue": "FFFFFF"
-      },
-      {
-        "type": "color",
-        "label": "Text Color 2",
-        "messageKey": "TextColor2",
-        "defaultValue": "FF5500"
-      },
-      {
-        "type": "color",
-        "label": "Hours Hand Color",
-        "messageKey": "HoursHandColor",
-        "defaultValue": "FFFFFF"
-      },
-      {
-        "type": "color",
-        "label": "Hours Hand Border Color",
-        "messageKey": "HoursHandBorderColor",
-        "defaultValue": "000000"
-      },
-      {
-        "type": "color",
-        "label": "Minutes Hand Color",
-        "messageKey": "MinutesHandColor",
-        "defaultValue": "FFFFFF"
-      },
-      {
-        "type": "color",
-        "label": "Minutes Hand Border Color",
-        "messageKey": "MinutesHandBorderColor",
-        "defaultValue": "000000"
-      },
-      {
-        "type": "color",
-        "label": "Seconds Hand Color",
-        "messageKey": "SecondsHandColor",
-        "defaultValue": "FF5500"
-      }
-    ]
-  },
-  {
-    "type": "section",
-    "capabilities": [ "BW" ],
-    "items": [
-      {
-        "type": "heading",
-        "defaultValue": "Colors"
-      },
-      {
-        "type": "color",
         "label": "Background Color 1",
+        "capabilities": [ "BW" ],
         "messageKey": "BWBackgroundColor1",
         "defaultValue": "FFFFFF"
       },
       {
         "type": "color",
+        "label": "Secondary Background Color 1",
+        "capabilities": [ "COLOR" ],
+        "messageKey": "SecondaryBackgroundColor1",
+        "defaultValue": "FFFFFF"
+      },
+      {
+        "type": "select",
+        "label": "Background Pattern 2",
+        "messageKey": "BackgroundPattern2",
+        "defaultValue": "0",
+        "options": [
+          {
+            "label": "Solid",
+            "value": "0"
+          },
+          {
+            "label": "Heavy Dither",
+            "value": "1"
+          },
+          {
+            "label": "Light Dither",
+            "value": "2"
+          },
+          {
+            "label": "Heavy Vertical",
+            "value": "3"
+          },
+          {
+            "label": "Light Vertical",
+            "value": "4"
+          },
+          {
+            "label": "Heavy Horizontal",
+            "value": "5"
+          },
+          {
+            "label": "Light Horizontal",
+            "value": "6"
+          },
+          {
+            "label": "Diagonal",
+            "value": "7"
+          },
+          {
+            "label": "Diagonal Mirror",
+            "value": "8"
+          },
+          {
+            "label": "Checkerboard",
+            "value": "9"
+          }
+        ]
+      },
+      {
+        "type": "color",
         "label": "Background Color 2",
+        "capabilities": [ "COLOR" ],
+        "messageKey": "BackgroundColor2",
+        "defaultValue": "FFFFAA"
+      },
+      {
+        "type": "color",
+        "label": "Background Color 2",
+        "capabilities": [ "BW" ],
         "messageKey": "BWBackgroundColor2",
         "defaultValue": "000000"
       },
       {
         "type": "color",
+        "label": "Secondary Background Color 2",
+        "capabilities": [ "COLOR" ],
+        "messageKey": "SecondaryBackgroundColor2",
+        "defaultValue": "FF5500"
+      },
+      {
+        "type": "color",
         "label": "Text Color 1",
+        "capabilities": [ "COLOR" ],
+        "messageKey": "TextColor1",
+        "defaultValue": "FFFFFF"
+      },
+      {
+        "type": "color",
+        "label": "Text Color 1",
+        "capabilities": [ "BW" ],
         "messageKey": "BWTextColor1",
         "defaultValue": "000000"
       },
       {
         "type": "color",
         "label": "Text Color 2",
+        "capabilities": [ "COLOR" ],
+        "messageKey": "TextColor2",
+        "defaultValue": "FF5500"
+      },
+      {
+        "type": "color",
+        "label": "Text Color 2",
+        "capabilities": [ "BW" ],
         "messageKey": "BWTextColor2",
         "defaultValue": "FFFFFF"
       },
       {
+        "type": "toggle",
+        "label": "No Pattern Under Text",
+        "messageKey": "NoPatternUnderText",
+        "description": "When enabled, the background will be solid under text and icons to improve legibility, especially on B&W screens. Not recommended, as it might drain the battery faster.",
+        "defaultValue": false
+      },
+      {
         "type": "color",
         "label": "Hours Hand Color",
+        "capabilities": [ "COLOR" ],
+        "messageKey": "HoursHandColor",
+        "defaultValue": "FFFFFF"
+      },
+      {
+        "type": "color",
+        "label": "Hours Hand Border Color",
+        "capabilities": [ "COLOR" ],
+        "messageKey": "HoursHandBorderColor",
+        "defaultValue": "000000"
+      },
+      {
+        "type": "color",
+        "label": "Minutes Hand Color",
+        "capabilities": [ "COLOR" ],
+        "messageKey": "MinutesHandColor",
+        "defaultValue": "FFFFFF"
+      },
+      {
+        "type": "color",
+        "label": "Minutes Hand Border Color",
+        "capabilities": [ "COLOR" ],
+        "messageKey": "MinutesHandBorderColor",
+        "defaultValue": "000000"
+      },
+      {
+        "type": "color",
+        "label": "Seconds Hand Color",
+        "capabilities": [ "COLOR" ],
+        "messageKey": "SecondsHandColor",
+        "defaultValue": "FF5500"
+      },
+      {
+        "type": "color",
+        "label": "Hours Hand Color",
+        "capabilities": [ "BW" ],
         "messageKey": "BWHoursHandColor",
         "defaultValue": "FFFFFF"
       },
       {
         "type": "color",
         "label": "Hours Hand Border Color",
+        "capabilities": [ "BW" ],
         "messageKey": "BWHoursHandBorderColor",
         "defaultValue": "000000"
       },
       {
         "type": "color",
         "label": "Minutes Hand Color",
+        "capabilities": [ "BW" ],
         "messageKey": "BWMinutesHandColor",
         "defaultValue": "FFFFFF"
       },
       {
         "type": "color",
         "label": "Minutes Hand Border Color",
+        "capabilities": [ "BW" ],
         "messageKey": "BWMinutesHandBorderColor",
         "defaultValue": "000000"
       },
       {
         "type": "color",
         "label": "Seconds Hand Color",
+        "capabilities": [ "BW" ],
         "messageKey": "BWSecondsHandColor",
         "defaultValue": "FFFFFF"
       },
       {
         "type": "color",
         "label": "Seconds Hand Border Color",
+        "capabilities": [ "BW" ],
         "messageKey": "BWSecondsHandBorderColor",
         "defaultValue": "000000"
       }
