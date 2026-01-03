@@ -1,5 +1,6 @@
 #include <pebble.h>
 #include "BinaryImageMaskData.h"
+#include "MathUtils.h"
 
 struct BinaryImageMaskData* binary_image_mask_data_create(GSize size);
 void binary_image_mask_data_destroy(BinaryImageMaskData* bimd);
@@ -8,6 +9,7 @@ void binary_image_mask_data_set_bit(BinaryImageMaskData* bimd, int x, int y, boo
 void binary_image_mask_data_clear_region(BinaryImageMaskData* bimd, GRect region, bool centered);
 bool binary_image_mask_data_get_pixel(BinaryImageMaskData* bimd, int x, int y);
 void binary_image_mask_data_draw(BinaryImageMaskData* dest, BinaryImageMaskData* src, GPoint dest_pos, GRect src_reg, bool centered);
+bool binary_image_mask_data_is_filled_or_adjacent(BinaryImageMaskData* bimd, int x, int y, int margin);
 
 struct BinaryImageMaskData* binary_image_mask_data_create(GSize size) {
   BinaryImageMaskData *bimd = (BinaryImageMaskData*) malloc(sizeof(BinaryImageMaskData));
@@ -51,7 +53,7 @@ void binary_image_mask_data_clear_region(BinaryImageMaskData* bimd, GRect region
 
   for(int x = region.origin.x; x < region.origin.x + region.size.w; x++) {
     GPoint actual_pos = GPoint(x - offset.x, 0);
-    if(actual_pos.x > bimd->size.w) {
+    if (actual_pos.x > bimd->size.w) {
       break;
     }
     if (actual_pos.x < 0) {
@@ -59,7 +61,7 @@ void binary_image_mask_data_clear_region(BinaryImageMaskData* bimd, GRect region
     }
     for(int y = region.origin.y; y < region.origin.y + region.size.h; y++) {
       actual_pos.y = y - offset.y;
-      if(actual_pos.y > bimd->size.h) {
+      if (actual_pos.y > bimd->size.h) {
         break;
       }
       if (actual_pos.y < 0) {
@@ -74,6 +76,17 @@ bool binary_image_mask_data_get_pixel(BinaryImageMaskData* bimd, int x, int y) {
   uint8_t byte = bimd->data[(bimd->size.w * y + x) / 8];
   int reminder = (bimd->size.w * y + x) % 8;
   return ((byte >> reminder) & 1) == 1;
+}
+
+bool binary_image_mask_data_is_filled_or_adjacent(BinaryImageMaskData* bimd, int x, int y, int margin) {
+  for (int yy = max(y - margin, 0); yy <= min(y + margin, bimd->size.h - 1); yy++) {
+    for (int xx = max(x - margin, 0); xx <= min(x + margin, bimd->size.w - 1); xx++) {
+      if (binary_image_mask_data_get_pixel(bimd, xx, yy)) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 void binary_image_mask_data_draw(BinaryImageMaskData* dest, BinaryImageMaskData* src, GPoint dest_pos, GRect src_reg, bool centered) {
