@@ -562,7 +562,7 @@ DialSpec* get_dial_spec() {
     int digital_time_x = 0;
     int digital_time_y = 0;
     if (!is_round()) {
-      digital_time_y = bounds.size.h * 0.82; 
+      digital_time_y = bounds.size.h * 0.82;
       if (is_large_screen()) {
         digital_time_x = bounds.size.w - ds->digital_box_size.w / 2 - 8;
       } else {
@@ -1015,23 +1015,19 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
 #endif
 
   if (!settings.DigitalWatch) {
-    int minutes_angle = ((float)minutes / 60 * 360) + ((float)seconds / 60 * 360 / 60) - 90;
+    int minutes_angle = (minutes * 6) + (seconds / 10) - 90;
+    int hours_angle = (hours * 30) + (minutes / 2) + (seconds / 120) - 90;
+
 #ifdef PBL_COLOR
     draw_fancy_hand(ctx, minutes_angle, bounds.size.w / 2 - 10, settings.MinutesHandColor, settings.MinutesHandBorderColor);
-#else
-    draw_fancy_hand(ctx, minutes_angle, bounds.size.w / 2 - 10, settings.BWMinutesHandColor, settings.BWMinutesHandBorderColor);
-#endif
-
-    int hours_angle = ((float)hours / 12 * 360) + ((float)minutes / 60 * 360 / 12) + ((float)seconds / 60 * 360 / 60 / 12)  - 90;
-
-#ifdef PBL_COLOR
     draw_fancy_hand(ctx, hours_angle, bounds.size.w / 2 - 30, settings.HoursHandColor, settings.HoursHandBorderColor);
 #else
+    draw_fancy_hand(ctx, minutes_angle, bounds.size.w / 2 - 10, settings.BWMinutesHandColor, settings.BWMinutesHandBorderColor);
     draw_fancy_hand(ctx, hours_angle, bounds.size.w / 2 - 30, settings.BWHoursHandColor, settings.BWHoursHandBorderColor);
 #endif
 
     if (settings.EnableSecondsHand) {
-      int seconds_angle = ((float)seconds / 60 * 360) - 90;
+      int seconds_angle = (seconds * 6) - 90;
 #ifdef PBL_COLOR
       draw_line_hand(ctx, seconds_angle, bounds.size.w / 2 - 5, 15, settings.SecondsHandColor);
 #else
@@ -1092,7 +1088,7 @@ static GColor handle_background_pattern(int x, int y, bool is_in_bg1) {
 
   GColor color = color1;
 
-  if (pattern != SOLID && (!settings.NoPatternUnderText || !binary_image_mask_data_is_filled_or_adjacent(dial, x, y, 1))) {
+  if (pattern != SOLID && color1.argb != color2.argb && (!settings.NoPatternUnderText || !binary_image_mask_data_is_filled_or_adjacent(dial, x, y, 1))) {
     switch (pattern) {
       case DITHER_STRONG:
         if (y % 2 == 0 && (((y % 4) + x) % 4) == 0) {
@@ -1182,54 +1178,37 @@ static void bg_update_proc(Layer *layer, GContext *ctx) {
   seconds = 0;
 #endif
 
-  int angle = 360 -settings.Angle + 90;
-  if (!settings.FixedAngle) {
-    angle = 360 - ((float)minutes / 60 * 360) - ((float)seconds / 60 * 360 / 60) + 90;
-  }
+  int angle = settings.FixedAngle
+    ? (settings.Angle)
+    : ((minutes * 6) + (seconds / 10)); // 6º per minute
+  angle -= 90; // Align so 0º points up like
 
   GPoint origin = GPoint(bounds.size.w / 2, bounds.size.h / 2);
   GPoint p = polar_to_point_offset(origin, angle, bounds.size.h);
-  bool is_vertical = false;
 
-  if (p.x == origin.x) {
-    is_vertical = true;
-  }
+  int cx = origin.x;
+  int cy = origin.y;
+  int px = p.x;
+  int py = p.y;
 
-  float m = (is_vertical) ? 0 : -slope_from_two_points(origin, p);
-  int b = (origin.y + offset_y - m * origin.x) + 0.5;
-
-  for(int y = max(0, offset_y); y < bounds.size.h + offset_y; y++) {
+  for(int y = MAX(0, offset_y); y < bounds.size.h + offset_y; y++) {
     GBitmapDataRowInfo info = gbitmap_get_data_row_info(fb, y);
+    size_t row_offset = (size_t)dial->size.w * (y - offset_y);
 
-    for(int x = info.min_x; x <= info.max_x; x++) {
-      int line_y = m * x + b;
-      int half_width = bounds.size.w / 2;
+    for (int x = info.min_x; x <= info.max_x; x++) {
+      // Cross product test for side of line
+      int cross = ((x - cx) * (py - cy)) - ((y - cy) * (px - cx));
+      bool is_in_bg1 = (cross < 0);
 
-      GColor color = settings.BackgroundColor1;
-      bool is_in_bg1 = true;
-      if (!is_vertical && minutes < 30 && y <= line_y) {
-        is_in_bg1 = false;
-      } else if (!is_vertical && minutes >= 30 && y >= line_y) {
-        is_in_bg1 = false;
-      } else if (is_vertical && (minutes >= 59 || minutes <= 1) && x <= half_width) {
-        is_in_bg1 = false;
-      } else if (is_vertical && (minutes >= 29 && minutes <= 31) && x >= half_width) {
-        is_in_bg1 = false;
-      }
+      size_t index = row_offset + x;
+      bool is_in_dial = (dial->data[index >> 3] >> (index & 7)) & 1;
 
-      bool is_in_dial = binary_image_mask_data_get_pixel(dial, x, y - offset_y);
-
-      if (is_in_bg1 && is_in_dial) {
+      GColor color;
+      if (is_in_dial) {
 #ifdef PBL_COLOR
-        color = settings.TextColor1;
+        color = is_in_bg1 ? settings.TextColor1 : settings.TextColor2;
 #else
-        color = settings.BWTextColor1;
-#endif
-      } else if (!is_in_bg1 && is_in_dial) {
-#ifdef PBL_COLOR
-        color = settings.TextColor2;
-#else
-        color = settings.BWTextColor2;
+        color = is_in_bg1 ? settings.BWTextColor1 : settings.BWTextColor2;
 #endif
       } else {
         color = handle_background_pattern(x, y, is_in_bg1);
