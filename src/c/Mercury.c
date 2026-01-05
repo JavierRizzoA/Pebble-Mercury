@@ -1183,7 +1183,7 @@ static void bg_update_proc(Layer *layer, GContext *ctx) {
     : ((minutes * 6) + (seconds / 10)); // 6º per minute
   angle -= 90; // Align so 0º points up like
 
-  GPoint origin = GPoint(bounds.size.w / 2, bounds.size.h / 2);
+  GPoint origin = GPoint(bounds.size.w / 2, bounds.size.h / 2 + offset_y);
   GPoint p = polar_to_point_offset(origin, angle, bounds.size.h);
 
   int cx = origin.x;
