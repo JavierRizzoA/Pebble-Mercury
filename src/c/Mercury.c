@@ -489,13 +489,17 @@ DialSpec* get_dial_spec() {
     ds->logo_size = GSize(38, 12);
     ds->model_size = GSize(71, 5);
   } else {
-    ds->logo_size = GSize(60, 16);
-    ds->model_size = GSize(83, 6);
+    ds->logo_size = GSize(64, 17);
+    ds->model_size = GSize(116, 8);
   }
   ds->logo = GPoint(half_screen_width, bounds.size.h * 0.19 + ds->logo_size.h / 2);
   ds->model = GPoint(half_screen_width, bounds.size.h * 0.19 + ds->logo_size.h + 1 + ds->model_size.h / 2);
   ds->day_res = RESOURCE_ID_DAYS;
-  ds->day_size = GSize(30, 10);
+  if (!is_large_screen()) {
+    ds->day_size = GSize(30, 10);
+  } else {
+    ds->day_size = GSize(45, 15);
+  }
   ds->moonphase_res = RESOURCE_ID_MOONPHASES;
   ds->moonphase_size = GSize(10, 10);
   ds->moonphase = GPoint(half_screen_width, bounds.size.h * 0.19 + ds->logo_size.h + 1 + ds->model_size.h + 1 + ds->moonphase_size.h / 2 + 5);
@@ -528,7 +532,11 @@ DialSpec* get_dial_spec() {
     ds->digit_res = RESOURCE_ID_DIGITS2;
     ds->digit_size = GSize(10, 10);
     ds->marker_res = RESOURCE_ID_MARKERS2;
-    ds->marker_size = GSize(22, 15);
+    if (!is_large_screen()) {
+      ds->marker_size = GSize(22, 15);
+    } else {
+      ds->marker_size = GSize(30, 20);
+    }
 
     ds->digital_box_res = RESOURCE_ID_DIGITAL_BOX2;
     ds->digital_colon_res = RESOURCE_ID_DIGITAL_COLON2;
@@ -548,7 +556,11 @@ DialSpec* get_dial_spec() {
     ds->digit_res = RESOURCE_ID_DIGITS3;
     ds->digit_size = GSize(10, 11);
     ds->marker_res = RESOURCE_ID_MARKERS3;
-    ds->marker_size = GSize(26, 16);
+    if (!is_large_screen()) {
+      ds->marker_size = GSize(26, 16);
+    } else {
+      ds->marker_size = GSize(33, 21);
+    }
 
     ds->digital_box_res = RESOURCE_ID_DIGITAL_BOX3;
     ds->digital_colon_res = RESOURCE_ID_DIGITAL_COLON3;
@@ -579,7 +591,11 @@ DialSpec* get_dial_spec() {
   } else {
     // Digital watch date uses different digit font.
     ds->digit_res = RESOURCE_ID_DIGITS_DIGITAL;
-    ds->digit_size = GSize(8, 10);
+    if (!is_large_screen()) {
+      ds->digit_size = GSize(8, 10);
+    } else {
+      ds->digit_size = GSize(12, 15);
+    }
 
     // Digital time positioning.
     int digital_time_x = 0;

@@ -20,7 +20,9 @@
 ./ImageEncoder/ImageEncoder.py --input img/resources/logo~emery.png --output resources/logo~emery.bin --invert
 ./ImageEncoder/ImageEncoder.py --input img/resources/markers1.png --output resources/markers1.bin --invert
 ./ImageEncoder/ImageEncoder.py --input img/resources/markers2.png --output resources/markers2.bin --invert
+./ImageEncoder/ImageEncoder.py --input img/resources/markers2~emery.png --output resources/markers2~emery.bin --invert
 ./ImageEncoder/ImageEncoder.py --input img/resources/markers3.png --output resources/markers3.bin --invert
+./ImageEncoder/ImageEncoder.py --input img/resources/markers3~emery.png --output resources/markers3~emery.bin --invert
 ./ImageEncoder/ImageEncoder.py --input img/resources/models.png --output resources/models.bin --invert
 ./ImageEncoder/ImageEncoder.py --input img/resources/models~emery.png --output resources/models~emery.bin --invert
 ./ImageEncoder/ImageEncoder.py --input img/resources/digital_colon1.png --output resources/digital_colon1.bin --invert
@@ -30,5 +32,7 @@
 ./ImageEncoder/ImageEncoder.py --input img/resources/digital_colon2~emery.png --output resources/digital_colon2~emery.bin --invert
 ./ImageEncoder/ImageEncoder.py --input img/resources/digital_colon3~emery.png --output resources/digital_colon3~emery.bin --invert
 ./ImageEncoder/ImageEncoder.py --input img/resources/days.png --output resources/days.bin --invert
+./ImageEncoder/ImageEncoder.py --input img/resources/days~emery.png --output resources/days~emery.bin --invert
 ./ImageEncoder/ImageEncoder.py --input img/resources/digits_digital.png --output resources/digits_digital.bin --invert
+./ImageEncoder/ImageEncoder.py --input img/resources/digits_digital~emery.png --output resources/digits_digital~emery.bin --invert
 ./ImageEncoder/ImageEncoder.py --input img/resources/moonphases.png --output resources/moonphases.bin --invert
